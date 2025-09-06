@@ -1,0 +1,6 @@
+[build]
+builder = "paketobuildpacks/builder:base"
+buildCommand = "./gradlew clean build -x test"
+
+[env]
+JAVA_VERSION = "21"
