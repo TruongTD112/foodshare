@@ -54,7 +54,9 @@ public enum ErrorCode {
     // File Upload Errors
     FILE_TOO_LARGE("400", "File size exceeds limit"),
     INVALID_FILE_TYPE("400", "Invalid file type"),
-    FILE_UPLOAD_FAILED("500", "File upload failed");
+    FILE_UPLOAD_FAILED("500", "File upload failed"),
+    FILE_DELETE_FAILED("500", "File deletion failed"),
+    IMAGE_NOT_FOUND("404", "Image not found");
 
     private final String code;
     private final String message;
