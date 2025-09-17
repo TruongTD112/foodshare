@@ -20,5 +20,5 @@ public class ProductSearchItem {
 	BigDecimal shopLatitude;
 	BigDecimal shopLongitude;
 	Double distanceKm;
-	Integer totalOrders; // Số lượng đơn đã đặt (chỉ cho API popular)
+	Integer totalOrders; // Số lượng đơn đã đặt (cho tất cả API)
 } 

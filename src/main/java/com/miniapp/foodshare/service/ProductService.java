@@ -137,6 +137,18 @@ public class ProductService {
                     .collect(Collectors.toMap(Shop::getId, s -> s));
         }
 
+        // Get sales stats for all products
+        Set<Integer> productIds = products.stream()
+                .map(Product::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Integer, ProductSalesStats> statsByProductId = new HashMap<>();
+        if (!productIds.isEmpty()) {
+            statsByProductId = productSalesStatsRepository.findByProductIdIn(productIds)
+                    .stream()
+                    .collect(Collectors.toMap(ProductSalesStats::getProductId, stats -> stats));
+        }
+
         List<ProductSearchItem> items = new ArrayList<>(products.size());
         for (Product product : products) {
             Shop shop = product.getShopId() == null ? null : shopById.get(product.getShopId());
@@ -161,6 +173,10 @@ public class ProductService {
                 discountPercentage = discountAmount.divide(product.getOriginalPrice(), 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP);
             }
 
+            // Lấy thông tin totalOrders từ ProductSalesStats
+            ProductSalesStats salesStats = statsByProductId.get(product.getId());
+            Integer totalOrders = salesStats != null ? salesStats.getTotalOrders() : 0;
+
             items.add(ProductSearchItem.builder()
                     .productId(product.getId())
                     .name(product.getName())
@@ -174,7 +190,7 @@ public class ProductService {
                     .shopLatitude(shop.getLatitude())
                     .shopLongitude(shop.getLongitude())
                     .distanceKm(distanceKm)
-                    .totalOrders(null) // Không có thông tin đơn hàng cho API này
+                    .totalOrders(totalOrders) // Số lượng đơn đã đặt
                     .build());
         }
 
@@ -310,6 +326,18 @@ public class ProductService {
                     .collect(Collectors.toMap(Shop::getId, s -> s));
         }
 
+        // Get sales stats for all products
+        Set<Integer> productIds = products.stream()
+                .map(Product::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Integer, ProductSalesStats> statsByProductId = new HashMap<>();
+        if (!productIds.isEmpty()) {
+            statsByProductId = productSalesStatsRepository.findByProductIdIn(productIds)
+                    .stream()
+                    .collect(Collectors.toMap(ProductSalesStats::getProductId, stats -> stats));
+        }
+
         List<ProductSearchItem> items = new ArrayList<>(products.size());
         for (Product product : products) {
             Shop shop = product.getShopId() == null ? null : shopById.get(product.getShopId());
@@ -330,6 +358,10 @@ public class ProductService {
                 discountPercentage = discountAmount.divide(product.getOriginalPrice(), 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP);
             }
 
+            // Lấy thông tin totalOrders từ ProductSalesStats
+            ProductSalesStats salesStats = statsByProductId.get(product.getId());
+            Integer totalOrders = salesStats != null ? salesStats.getTotalOrders() : 0;
+
             items.add(ProductSearchItem.builder()
                     .productId(product.getId())
                     .name(product.getName())
@@ -343,7 +375,7 @@ public class ProductService {
                     .shopLatitude(shop.getLatitude())
                     .shopLongitude(shop.getLongitude())
                     .distanceKm(distanceKm)
-                    .totalOrders(null) // Không có thông tin đơn hàng cho API này
+                    .totalOrders(totalOrders) // Số lượng đơn đã đặt
                     .build());
         }
 

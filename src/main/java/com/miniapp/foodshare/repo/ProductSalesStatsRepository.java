@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ProductSalesStatsRepository extends JpaRepository<ProductSalesStats, Integer> {
 	
@@ -17,6 +19,11 @@ public interface ProductSalesStatsRepository extends JpaRepository<ProductSalesS
 	 * Tìm thống kê bán hàng theo productId
 	 */
 	Optional<ProductSalesStats> findByProductId(Integer productId);
+	
+	/**
+	 * Tìm thống kê bán hàng theo danh sách productId
+	 */
+	List<ProductSalesStats> findByProductIdIn(Set<Integer> productIds);
 	
 	/**
 	 * Lấy danh sách sản phẩm bán chạy nhất theo tổng số lượng đã bán
