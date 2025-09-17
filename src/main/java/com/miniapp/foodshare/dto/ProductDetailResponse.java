@@ -29,8 +29,8 @@ public class ProductDetailResponse {
 		Integer id;
 		String name;
 		String address;
-		Double latitude;
-		Double longitude;
+		BigDecimal latitude;
+		BigDecimal longitude;
 		String description;
 		BigDecimal rating;
 		String status;

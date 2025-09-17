@@ -11,10 +11,13 @@ public class ProductSearchItem {
 	Integer productId;
 	String name;
 	BigDecimal price;
+	BigDecimal originalPrice;
+	BigDecimal discountPercentage; // Tính toán từ originalPrice và price
 	String imageUrl;
 	Integer shopId;
 	String shopName;
-	Double shopLatitude;
-	Double shopLongitude;
+	BigDecimal shopLatitude;
+	BigDecimal shopLongitude;
 	Double distanceKm;
+	Integer totalOrders; // Số lượng đơn đã đặt (chỉ cho API popular)
 } 

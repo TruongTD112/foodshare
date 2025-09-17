@@ -10,6 +10,7 @@ import com.miniapp.foodshare.entity.Product;
 import com.miniapp.foodshare.entity.Shop;
 import com.miniapp.foodshare.repo.OrderRepository;
 import com.miniapp.foodshare.repo.ProductRepository;
+import com.miniapp.foodshare.repo.ProductSalesStatsRepository;
 import com.miniapp.foodshare.repo.ShopRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class OrderService {
 	private final OrderRepository orderRepository;
 	private final ProductRepository productRepository;
+	private final ProductSalesStatsRepository productSalesStatsRepository;
 	private final ShopRepository shopRepository;
 	
 	@Transactional
@@ -112,6 +114,63 @@ public class OrderService {
 			
 		log.info("Order created successfully: orderId={}, userId={}, shopId={}, productId={}, quantity={}", 
 			response.getId(), response.getUserId(), response.getShopId(), response.getProductId(), response.getQuantity());
+		return Result.success(response);
+	}
+
+	/**
+	 * Cập nhật thống kê bán hàng khi order được completed
+	 * 
+	 * @param productId ID sản phẩm
+	 * @param quantity Số lượng đã bán
+	 */
+	@Transactional
+	public void updateSalesStats(Integer productId, Integer quantity) {
+		try {
+			productSalesStatsRepository.updateSalesStats(productId, quantity);
+			log.info("Sales stats updated: productId={}, quantity={}", productId, quantity);
+		} catch (Exception e) {
+			log.error("Failed to update sales stats: productId={}, quantity={}, error={}", 
+					productId, quantity, e.getMessage());
+		}
+	}
+
+	/**
+	 * Xác nhận order (chuyển từ pending sang completed)
+	 * Cập nhật thống kê bán hàng
+	 */
+	@Transactional
+	public Result<OrderResponse> confirmOrder(Integer orderId) {
+		Order order = orderRepository.findById(orderId).orElse(null);
+		if (order == null) {
+			log.warn("Order not found: orderId={}", orderId);
+			return Result.error(ErrorCode.ORDER_NOT_FOUND, "Order not found: " + orderId);
+		}
+
+		if (!Constants.OrderStatus.PENDING.equals(order.getStatus())) {
+			log.warn("Order cannot be confirmed: orderId={}, status={}", orderId, order.getStatus());
+			return Result.error(ErrorCode.INVALID_ORDER_STATUS, "Only pending orders can be confirmed");
+		}
+
+		// Cập nhật status order
+		order.setStatus(Constants.OrderStatus.COMPLETED);
+		Order savedOrder = orderRepository.save(order);
+
+		// Cập nhật thống kê bán hàng
+		updateSalesStats(order.getProductId(), order.getQuantity());
+
+		// Cập nhật quantity trong Product (chỉ giảm quantityPending, không cần giảm quantityAvailable)
+		Product product = productRepository.findById(order.getProductId()).orElse(null);
+		if (product != null) {
+			Integer currentPending = product.getQuantityPending() != null ? product.getQuantityPending() : 0;
+			
+			// Chỉ giảm quantityPending vì quantityAvailable đã được giảm khi tạo order
+			product.setQuantityPending(currentPending - order.getQuantity());
+			productRepository.save(product);
+		}
+
+		OrderResponse response = map(savedOrder);
+		log.info("Order confirmed successfully: orderId={}, productId={}, quantity={}", 
+				orderId, order.getProductId(), order.getQuantity());
 		return Result.success(response);
 	}
 

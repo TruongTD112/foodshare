@@ -3,11 +3,14 @@ package com.miniapp.foodshare.service;
 import com.miniapp.foodshare.common.Constants;
 import com.miniapp.foodshare.common.ErrorCode;
 import com.miniapp.foodshare.common.Result;
+import com.miniapp.foodshare.dto.PagedResult;
 import com.miniapp.foodshare.dto.ProductDetailResponse;
 import com.miniapp.foodshare.dto.ProductSearchItem;
 import com.miniapp.foodshare.entity.Product;
+import com.miniapp.foodshare.entity.ProductSalesStats;
 import com.miniapp.foodshare.entity.Shop;
 import com.miniapp.foodshare.repo.ProductRepository;
+import com.miniapp.foodshare.repo.ProductSalesStatsRepository;
 import com.miniapp.foodshare.repo.ShopRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,6 +35,7 @@ import java.util.stream.Collectors;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ShopRepository shopRepository;
+    private final ProductSalesStatsRepository productSalesStatsRepository;
 
     /**
      * Searches products by optional name (case-insensitive substring), optional price range,
@@ -57,7 +62,7 @@ public class ProductService {
      * @return paginated list of search results enriched with shop details and distance when applicable
      */
     @Transactional(readOnly = true)
-    public Result<Page<ProductSearchItem>> searchProducts(
+    public Result<PagedResult<ProductSearchItem>> searchProducts(
             String nameQuery,
             Double latitude,
             Double longitude,
@@ -109,7 +114,16 @@ public class ProductService {
         if (products.isEmpty()) {
             log.info("No products found for search: nameQuery={}, minPrice={}, maxPrice={}, page={}, size={}",
                     nameQuery, minPrice, maxPrice, page, size);
-            return Result.success(Page.empty(pageable));
+            PagedResult<ProductSearchItem> emptyResult = PagedResult.<ProductSearchItem>builder()
+                    .content(List.of())
+                    .page(page)
+                    .size(size)
+                    .totalElements(0)
+                    .totalPages(0)
+                    .hasNext(false)
+                    .hasPrevious(false)
+                    .build();
+            return Result.success(emptyResult);
         }
 
         Set<Integer> shopIds = products.stream()
@@ -140,16 +154,26 @@ public class ProductService {
                 continue;
             }
 
+            // Calculate discount percentage from originalPrice and price (chỉ lấy phần nguyên)
+            BigDecimal discountPercentage = BigDecimal.ZERO;
+            if (product.getOriginalPrice() != null && product.getPrice() != null && product.getOriginalPrice().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal discountAmount = product.getOriginalPrice().subtract(product.getPrice());
+                discountPercentage = discountAmount.divide(product.getOriginalPrice(), 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP);
+            }
+
             items.add(ProductSearchItem.builder()
                     .productId(product.getId())
                     .name(product.getName())
                     .price(product.getPrice())
+                    .originalPrice(product.getOriginalPrice())
+                    .discountPercentage(discountPercentage)
                     .imageUrl(product.getImageUrl())
                     .shopId(product.getShopId())
                     .shopName(shop.getName())
-                    .shopLatitude(shop.getLatitude() != null ? shop.getLatitude().doubleValue() : null)
-                    .shopLongitude(shop.getLongitude() != null ? shop.getLongitude().doubleValue() : null)
+                    .shopLatitude(shop.getLatitude())
+                    .shopLongitude(shop.getLongitude())
                     .distanceKm(distanceKm)
+                    .totalOrders(null) // Không có thông tin đơn hàng cho API này
                     .build());
         }
 
@@ -168,13 +192,303 @@ public class ProductService {
         }
 
         // Create paginated result
-        int totalElements = (int) productPage.getTotalElements();
-        Page<ProductSearchItem> resultPage = new org.springframework.data.domain.PageImpl<>(
-                items, pageable, totalElements);
+        long totalElements = productPage.getTotalElements();
+        int totalPages = productPage.getTotalPages();
+        
+        PagedResult<ProductSearchItem> result = PagedResult.<ProductSearchItem>builder()
+                .content(items)
+                .page(page)
+                .size(size)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .hasNext(page < totalPages - 1)
+                .hasPrevious(page > 0)
+                .build();
 
         log.info("Products search completed: nameQuery={}, found={}, hasCoords={}, priceSort={}, page={}, size={}, totalElements={}",
                 nameQuery, items.size(), hasCoords, priceSort, page, size, totalElements);
-        return Result.success(resultPage);
+        return Result.success(result);
+    }
+
+    /**
+     * Tìm kiếm sản phẩm gần đây dựa trên vị trí người dùng với khoảng cách mặc định.
+     * Sử dụng khoảng cách mặc định từ Constants.Distance.DEFAULT_MAX_DISTANCE_KM.
+     * 
+     * @param latitude vĩ độ của người dùng (bắt buộc)
+     * @param longitude kinh độ của người dùng (bắt buộc)
+     * @param page số trang (mặc định: 0)
+     * @param size kích thước trang (mặc định: 20)
+     * @return danh sách sản phẩm gần đây được phân trang
+     */
+    @Transactional(readOnly = true)
+    public Result<PagedResult<ProductSearchItem>> searchNearbyProducts(
+            Double latitude,
+            Double longitude,
+            int page,
+            int size
+    ) {
+        // Validate coordinates
+        if (latitude == null || longitude == null) {
+            log.warn("Missing coordinates for nearby search: latitude={}, longitude={}", latitude, longitude);
+            return Result.error(ErrorCode.INVALID_REQUEST, "Latitude and longitude are required for nearby search");
+        }
+
+        // Validate coordinate ranges
+        if (latitude < -90 || latitude > 90) {
+            log.warn("Invalid latitude: {}", latitude);
+            return Result.error(ErrorCode.INVALID_REQUEST, "Latitude must be between -90 and 90 degrees");
+        }
+        if (longitude < -180 || longitude > 180) {
+            log.warn("Invalid longitude: {}", longitude);
+            return Result.error(ErrorCode.INVALID_REQUEST, "Longitude must be between -180 and 180 degrees");
+        }
+
+        // Use default max distance from constants
+        Double maxDistanceKm = Constants.Distance.DEFAULT_MAX_DISTANCE_KM;
+        
+        log.info("Searching nearby products: latitude={}, longitude={}, maxDistanceKm={}, page={}, size={}", 
+                latitude, longitude, maxDistanceKm, page, size);
+
+        // Call existing search method with default distance
+        return searchProducts(null, latitude, longitude, maxDistanceKm, null, null, null, page, size);
+    }
+
+    /**
+     * Lấy danh sách sản phẩm giảm giá nhiều nhất, sắp xếp theo mức giảm giá giảm dần.
+     * API đơn giản chỉ lấy tất cả sản phẩm có giảm giá và sắp xếp theo số tiền giảm.
+     * 
+     * @param latitude vĩ độ của người dùng (tùy chọn)
+     * @param longitude kinh độ của người dùng (tùy chọn)
+     * @param page số trang (mặc định: 0)
+     * @param size kích thước trang (mặc định: 20)
+     * @return danh sách sản phẩm giảm giá được phân trang
+     */
+    @Transactional(readOnly = true)
+    public Result<PagedResult<ProductSearchItem>> searchTopDiscountedProducts(Double latitude, Double longitude, int page, int size) {
+        // Validate pagination parameters
+        if (page < Constants.Pagination.DEFAULT_PAGE_NUMBER) {
+            log.warn("Invalid page number: page={}", page);
+            return Result.error(ErrorCode.INVALID_PAGE_NUMBER, "Page number must be >= 0");
+        }
+        if (size <= 0 || size > Constants.Pagination.MAX_PAGE_SIZE) {
+            log.warn("Invalid page size: size={}", size);
+            return Result.error(ErrorCode.INVALID_PAGE_SIZE, "Page size must be between 1 and 100");
+        }
+
+        final boolean hasCoords = latitude != null && longitude != null;
+
+        // Create pageable for database query
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Get discounted products sorted by discount amount
+        Page<Product> productPage = productRepository.findDiscountedProductsByDiscountAmount(Constants.ProductStatus.ACTIVE, pageable);
+        List<Product> products = productPage.getContent();
+
+        if (products.isEmpty()) {
+            log.info("No discounted products found: page={}, size={}", page, size);
+            PagedResult<ProductSearchItem> emptyResult = PagedResult.<ProductSearchItem>builder()
+                    .content(List.of())
+                    .page(page)
+                    .size(size)
+                    .totalElements(0)
+                    .totalPages(0)
+                    .hasNext(false)
+                    .hasPrevious(false)
+                    .build();
+            return Result.success(emptyResult);
+        }
+
+        Set<Integer> shopIds = products.stream()
+                .map(Product::getShopId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<Integer, Shop> shopById = new HashMap<>();
+        if (!shopIds.isEmpty()) {
+            shopById = shopRepository.findAllById(shopIds).stream()
+                    .collect(Collectors.toMap(Shop::getId, s -> s));
+        }
+
+        List<ProductSearchItem> items = new ArrayList<>(products.size());
+        for (Product product : products) {
+            Shop shop = product.getShopId() == null ? null : shopById.get(product.getShopId());
+            // Only active shops (status == "1")
+            if (shop == null || shop.getStatus() == null || !shop.getStatus().trim().equals(Constants.ShopStatus.ACTIVE)) {
+                continue;
+            }
+
+            Double distanceKm = null;
+            if (hasCoords && shop.getLatitude() != null && shop.getLongitude() != null) {
+                distanceKm = haversineKm(latitude, longitude, shop.getLatitude().doubleValue(), shop.getLongitude().doubleValue());
+            }
+
+            // Calculate discount percentage from originalPrice and price (chỉ lấy phần nguyên)
+            BigDecimal discountPercentage = BigDecimal.ZERO;
+            if (product.getOriginalPrice() != null && product.getPrice() != null && product.getOriginalPrice().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal discountAmount = product.getOriginalPrice().subtract(product.getPrice());
+                discountPercentage = discountAmount.divide(product.getOriginalPrice(), 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP);
+            }
+
+            items.add(ProductSearchItem.builder()
+                    .productId(product.getId())
+                    .name(product.getName())
+                    .price(product.getPrice())
+                    .originalPrice(product.getOriginalPrice())
+                    .discountPercentage(discountPercentage)
+                    .imageUrl(product.getImageUrl())
+                    .shopId(product.getShopId())
+                    .shopName(shop.getName())
+                    .shopLatitude(shop.getLatitude())
+                    .shopLongitude(shop.getLongitude())
+                    .distanceKm(distanceKm)
+                    .totalOrders(null) // Không có thông tin đơn hàng cho API này
+                    .build());
+        }
+
+        // Create paginated result
+        long totalElements = productPage.getTotalElements();
+        int totalPages = productPage.getTotalPages();
+        
+        PagedResult<ProductSearchItem> result = PagedResult.<ProductSearchItem>builder()
+                .content(items)
+                .page(page)
+                .size(size)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .hasNext(page < totalPages - 1)
+                .hasPrevious(page > 0)
+                .build();
+
+        log.info("Top discounted products search completed: found={}, page={}, size={}, totalElements={}",
+                items.size(), page, size, totalElements);
+        return Result.success(result);
+    }
+
+    /**
+     * Lấy danh sách sản phẩm bán chạy nhất dựa trên tổng số lượng đã mua.
+     * Chỉ tính các order có status = 'completed'.
+     * 
+     * @param latitude vĩ độ của người dùng (tùy chọn)
+     * @param longitude kinh độ của người dùng (tùy chọn)
+     * @param page số trang (mặc định: 0)
+     * @param size kích thước trang (mặc định: 20)
+     * @return danh sách sản phẩm bán chạy được phân trang
+     */
+    @Transactional(readOnly = true)
+    public Result<PagedResult<ProductSearchItem>> searchPopularProducts(Double latitude, Double longitude, int page, int size) {
+        // Validate pagination parameters
+        if (page < Constants.Pagination.DEFAULT_PAGE_NUMBER) {
+            log.warn("Invalid page number: page={}", page);
+            return Result.error(ErrorCode.INVALID_PAGE_NUMBER, "Page number must be >= 0");
+        }
+        if (size <= 0 || size > Constants.Pagination.MAX_PAGE_SIZE) {
+            log.warn("Invalid page size: size={}", size);
+            return Result.error(ErrorCode.INVALID_PAGE_SIZE, "Page size must be between 1 and 100");
+        }
+
+        final boolean hasCoords = latitude != null && longitude != null;
+
+        // Create pageable for database query
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Get popular products sorted by total quantity sold
+        Page<Product> productPage = productRepository.findPopularProducts(Constants.ProductStatus.ACTIVE, pageable);
+        List<Product> products = productPage.getContent();
+
+        if (products.isEmpty()) {
+            log.info("No popular products found: page={}, size={}", page, size);
+            PagedResult<ProductSearchItem> emptyResult = PagedResult.<ProductSearchItem>builder()
+                    .content(List.of())
+                    .page(page)
+                    .size(size)
+                    .totalElements(0)
+                    .totalPages(0)
+                    .hasNext(false)
+                    .hasPrevious(false)
+                    .build();
+            return Result.success(emptyResult);
+        }
+
+        Set<Integer> shopIds = products.stream()
+                .map(Product::getShopId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<Integer, Shop> shopById = new HashMap<>();
+        if (!shopIds.isEmpty()) {
+            shopById = shopRepository.findAllById(shopIds).stream()
+                    .collect(Collectors.toMap(Shop::getId, s -> s));
+        }
+
+        // Lấy thông tin sales stats cho popular products
+        Set<Integer> productIds = products.stream()
+                .map(Product::getId)
+                .collect(Collectors.toSet());
+        
+        Map<Integer, ProductSalesStats> statsByProductId = new HashMap<>();
+        if (!productIds.isEmpty()) {
+            statsByProductId = productSalesStatsRepository.findAll().stream()
+                    .filter(stats -> productIds.contains(stats.getProductId()))
+                    .collect(Collectors.toMap(ProductSalesStats::getProductId, stats -> stats));
+        }
+
+        List<ProductSearchItem> items = new ArrayList<>(products.size());
+        for (Product product : products) {
+            Shop shop = product.getShopId() == null ? null : shopById.get(product.getShopId());
+            // Only active shops (status == "1")
+            if (shop == null || shop.getStatus() == null || !shop.getStatus().trim().equals(Constants.ShopStatus.ACTIVE)) {
+                continue;
+            }
+
+            Double distanceKm = null;
+            if (hasCoords && shop.getLatitude() != null && shop.getLongitude() != null) {
+                distanceKm = haversineKm(latitude, longitude, shop.getLatitude().doubleValue(), shop.getLongitude().doubleValue());
+            }
+
+            // Calculate discount percentage from originalPrice and price (chỉ lấy phần nguyên)
+            BigDecimal discountPercentage = BigDecimal.ZERO;
+            if (product.getOriginalPrice() != null && product.getPrice() != null && product.getOriginalPrice().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal discountAmount = product.getOriginalPrice().subtract(product.getPrice());
+                discountPercentage = discountAmount.divide(product.getOriginalPrice(), 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP);
+            }
+
+            // Lấy thông tin totalOrders từ ProductSalesStats
+            ProductSalesStats salesStats = statsByProductId.get(product.getId());
+            Integer totalOrders = salesStats != null ? salesStats.getTotalOrders() : 0;
+
+            items.add(ProductSearchItem.builder()
+                    .productId(product.getId())
+                    .name(product.getName())
+                    .price(product.getPrice())
+                    .originalPrice(product.getOriginalPrice())
+                    .discountPercentage(discountPercentage)
+                    .imageUrl(product.getImageUrl())
+                    .shopId(product.getShopId())
+                    .shopName(shop.getName())
+                    .shopLatitude(shop.getLatitude())
+                    .shopLongitude(shop.getLongitude())
+                    .distanceKm(distanceKm)
+                    .totalOrders(totalOrders) // Số lượng đơn đã đặt
+                    .build());
+        }
+
+        // Create paginated result
+        long totalElements = productPage.getTotalElements();
+        int totalPages = productPage.getTotalPages();
+        
+        PagedResult<ProductSearchItem> result = PagedResult.<ProductSearchItem>builder()
+                .content(items)
+                .page(page)
+                .size(size)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .hasNext(page < totalPages - 1)
+                .hasPrevious(page > 0)
+                .build();
+
+        log.info("Popular products search completed: found={}, page={}, size={}, totalElements={}",
+                items.size(), page, size, totalElements);
+        return Result.success(result);
     }
 
     @Transactional(readOnly = true)
@@ -206,8 +520,8 @@ public class ProductService {
                 .id(shop.getId())
                 .name(shop.getName())
                 .address(shop.getAddress())
-                .latitude(shop.getLatitude() != null ? shop.getLatitude().doubleValue() : null)
-                .longitude(shop.getLongitude() != null ? shop.getLongitude().doubleValue() : null)
+                .latitude(shop.getLatitude())
+                .longitude(shop.getLongitude())
                 .description(shop.getDescription())
                 .rating(shop.getRating())
                 .status(shop.getStatus())
