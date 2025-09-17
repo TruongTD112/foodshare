@@ -1,0 +1,475 @@
+{
+	"info": {
+		"_postman_id": "foodshare-api-collection",
+		"name": "FoodShare API Collection",
+		"description": "Collection để test tất cả API của FoodShare app",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Tìm kiếm sản phẩm chung",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products?q=pizza&lat=10.762622&lon=106.660172&maxDistanceKm=5.0&minPrice=10000&maxPrice=200000&priceSort=asc&page=0&size=10",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "pizza",
+							"description": "Tên sản phẩm để tìm kiếm"
+						},
+						{
+							"key": "lat",
+							"value": "10.762622",
+							"description": "Vĩ độ của người dùng"
+						},
+						{
+							"key": "lon",
+							"value": "106.660172",
+							"description": "Kinh độ của người dùng"
+						},
+						{
+							"key": "maxDistanceKm",
+							"value": "5.0",
+							"description": "Khoảng cách tối đa (km)"
+						},
+						{
+							"key": "minPrice",
+							"value": "10000",
+							"description": "Giá tối thiểu"
+						},
+						{
+							"key": "maxPrice",
+							"value": "200000",
+							"description": "Giá tối đa"
+						},
+						{
+							"key": "priceSort",
+							"value": "asc",
+							"description": "Sắp xếp giá: asc hoặc desc"
+						},
+						{
+							"key": "page",
+							"value": "0",
+							"description": "Số trang (0-based)"
+						},
+						{
+							"key": "size",
+							"value": "10",
+							"description": "Kích thước trang"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Tìm kiếm sản phẩm gần đây",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products/nearby?lat=10.762622&lon=106.660172&page=0&size=10",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"nearby"
+					],
+					"query": [
+						{
+							"key": "lat",
+							"value": "10.762622",
+							"description": "Vĩ độ (bắt buộc)"
+						},
+						{
+							"key": "lon",
+							"value": "106.660172",
+							"description": "Kinh độ (bắt buộc)"
+						},
+						{
+							"key": "page",
+							"value": "0",
+							"description": "Số trang"
+						},
+						{
+							"key": "size",
+							"value": "10",
+							"description": "Kích thước trang"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Sản phẩm giảm giá nhiều nhất",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products/top-discounts?lat=10.762622&lon=106.660172&page=0&size=10",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"top-discounts"
+					],
+					"query": [
+						{
+							"key": "lat",
+							"value": "10.762622",
+							"description": "Vĩ độ (tùy chọn)"
+						},
+						{
+							"key": "lon",
+							"value": "106.660172",
+							"description": "Kinh độ (tùy chọn)"
+						},
+						{
+							"key": "page",
+							"value": "0",
+							"description": "Số trang"
+						},
+						{
+							"key": "size",
+							"value": "10",
+							"description": "Kích thước trang"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Sản phẩm bán chạy nhất (có totalOrders)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products/popular?lat=10.762622&lon=106.660172&page=0&size=10",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"popular"
+					],
+					"query": [
+						{
+							"key": "lat",
+							"value": "10.762622",
+							"description": "Vĩ độ (tùy chọn)"
+						},
+						{
+							"key": "lon",
+							"value": "106.660172",
+							"description": "Kinh độ (tùy chọn)"
+						},
+						{
+							"key": "page",
+							"value": "0",
+							"description": "Số trang"
+						},
+						{
+							"key": "size",
+							"value": "10",
+							"description": "Kích thước trang"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. Chi tiết sản phẩm",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/products/1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"products",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Tạo đơn hàng",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userId\": 1,\n  \"shopId\": 1,\n  \"productId\": 1,\n  \"quantity\": 2,\n  \"pickupInMinutes\": 30\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/orders",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7. Xác nhận đơn hàng (chuyển sang completed)",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/orders/1/confirm",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"orders",
+						"1",
+						"confirm"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8. Lấy danh sách đơn hàng của user",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/orders/user/1?status=completed",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"orders",
+						"user",
+						"1"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "completed",
+							"description": "Trạng thái đơn hàng (tùy chọn)"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "9. Test API với các tham số khác nhau",
+			"item": [
+				{
+					"name": "Tìm kiếm không có tọa độ",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products?q=burger&page=0&size=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "burger"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Tìm kiếm với khoảng cách lớn",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/nearby?lat=10.762622&lon=106.660172&maxDistanceKm=50.0&page=0&size=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"nearby"
+							],
+							"query": [
+								{
+									"key": "lat",
+									"value": "10.762622"
+								},
+								{
+									"key": "lon",
+									"value": "106.660172"
+								},
+								{
+									"key": "maxDistanceKm",
+									"value": "50.0"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sắp xếp theo giá giảm dần",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products?priceSort=desc&page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "priceSort",
+									"value": "desc"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "10. Test Error Cases",
+			"item": [
+				{
+					"name": "Tìm kiếm gần đây không có tọa độ",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/nearby?page=0&size=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"nearby"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sản phẩm không tồn tại",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Phân trang không hợp lệ",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products?page=-1&size=0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "-1"
+								},
+								{
+									"key": "size",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"description": "Base URL của API server"
+		}
+	]
+}
