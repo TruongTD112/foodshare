@@ -14,11 +14,14 @@ public class ProductDetailResponse {
 	String name;
 	String description;
 	BigDecimal price;
+	BigDecimal originalPrice;
+	BigDecimal discountPercentage; // Tính toán từ originalPrice và price
 	String imageUrl;
 	String detailImageUrl; // Ảnh chi tiết sản phẩm
 	Integer quantityAvailable;
 	Integer quantityPending;
 	String status;
+	Integer totalOrders; // Số lượng đơn đã đặt
 	ShopInfo shop;
 
 	@Value

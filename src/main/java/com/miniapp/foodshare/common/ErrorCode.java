@@ -35,6 +35,7 @@ public enum ErrorCode {
     ORDER_CANNOT_BE_CANCELLED("400", "Only pending orders can be cancelled"),
     PRODUCT_NOT_BELONG_TO_SHOP("400", "Product does not belong to shop"),
     USER_NOT_FOUND("404", "User not found"),
+    EMAIL_ALREADY_EXISTS("409", "Email already exists"),
     INVALID_CREDENTIALS("401", "Invalid credentials"),
     TOKEN_EXPIRED("401", "Token expired"),
     INVALID_TOKEN("401", "Invalid token"),
