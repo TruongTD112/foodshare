@@ -147,7 +147,7 @@ public class ProductService {
 
             Double distanceKm = null;
             if (hasCoords && shop.getLatitude() != null && shop.getLongitude() != null) {
-                distanceKm = haversineKm(latitude, longitude, shop.getLatitude().doubleValue(), shop.getLongitude().doubleValue());
+                distanceKm = (double) Math.round(haversineKm(latitude, longitude, shop.getLatitude().doubleValue(), shop.getLongitude().doubleValue()));
             }
 
             if (maxDistanceKm != null && distanceKm != null && distanceKm > maxDistanceKm) {
@@ -168,6 +168,7 @@ public class ProductService {
                     .originalPrice(product.getOriginalPrice())
                     .discountPercentage(discountPercentage)
                     .imageUrl(product.getImageUrl())
+                    .detailImageUrl(product.getDetailImageUrl())
                     .shopId(product.getShopId())
                     .shopName(shop.getName())
                     .shopLatitude(shop.getLatitude())
@@ -319,7 +320,7 @@ public class ProductService {
 
             Double distanceKm = null;
             if (hasCoords && shop.getLatitude() != null && shop.getLongitude() != null) {
-                distanceKm = haversineKm(latitude, longitude, shop.getLatitude().doubleValue(), shop.getLongitude().doubleValue());
+                distanceKm = (double) Math.round(haversineKm(latitude, longitude, shop.getLatitude().doubleValue(), shop.getLongitude().doubleValue()));
             }
 
             // Calculate discount percentage from originalPrice and price (chỉ lấy phần nguyên)
@@ -336,6 +337,7 @@ public class ProductService {
                     .originalPrice(product.getOriginalPrice())
                     .discountPercentage(discountPercentage)
                     .imageUrl(product.getImageUrl())
+                    .detailImageUrl(product.getDetailImageUrl())
                     .shopId(product.getShopId())
                     .shopName(shop.getName())
                     .shopLatitude(shop.getLatitude())
@@ -442,7 +444,7 @@ public class ProductService {
 
             Double distanceKm = null;
             if (hasCoords && shop.getLatitude() != null && shop.getLongitude() != null) {
-                distanceKm = haversineKm(latitude, longitude, shop.getLatitude().doubleValue(), shop.getLongitude().doubleValue());
+                distanceKm = (double) Math.round(haversineKm(latitude, longitude, shop.getLatitude().doubleValue(), shop.getLongitude().doubleValue()));
             }
 
             // Calculate discount percentage from originalPrice and price (chỉ lấy phần nguyên)
@@ -463,6 +465,7 @@ public class ProductService {
                     .originalPrice(product.getOriginalPrice())
                     .discountPercentage(discountPercentage)
                     .imageUrl(product.getImageUrl())
+                    .detailImageUrl(product.getDetailImageUrl())
                     .shopId(product.getShopId())
                     .shopName(shop.getName())
                     .shopLatitude(shop.getLatitude())
@@ -520,6 +523,8 @@ public class ProductService {
                 .id(shop.getId())
                 .name(shop.getName())
                 .address(shop.getAddress())
+                .phone(shop.getPhone())
+                .imageUrl(shop.getImageUrl())
                 .latitude(shop.getLatitude())
                 .longitude(shop.getLongitude())
                 .description(shop.getDescription())
@@ -535,6 +540,7 @@ public class ProductService {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .imageUrl(product.getImageUrl())
+                .detailImageUrl(product.getDetailImageUrl())
                 .quantityAvailable(product.getQuantityAvailable())
                 .quantityPending(product.getQuantityPending())
                 .status(product.getStatus())

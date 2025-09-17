@@ -48,6 +48,9 @@ public class Product {
 	@Column(name = "image_url", length = 255)
 	private String imageUrl;
 
+	@Column(name = "detail_image_url", columnDefinition = "TEXT")
+	private String detailImageUrl;
+
 	@Column(name = "quantity_available")
 	private Integer quantityAvailable;
 

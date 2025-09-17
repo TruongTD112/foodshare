@@ -14,6 +14,7 @@ public class ProductSearchItem {
 	BigDecimal originalPrice;
 	BigDecimal discountPercentage; // Tính toán từ originalPrice và price
 	String imageUrl;
+	String detailImageUrl; // Ảnh chi tiết sản phẩm
 	Integer shopId;
 	String shopName;
 	BigDecimal shopLatitude;

@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Value;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Value
 @Builder
@@ -16,11 +15,10 @@ public class ProductDetailResponse {
 	String description;
 	BigDecimal price;
 	String imageUrl;
+	String detailImageUrl; // Ảnh chi tiết sản phẩm
 	Integer quantityAvailable;
 	Integer quantityPending;
 	String status;
-	LocalDateTime createdAt;
-	LocalDateTime updatedAt;
 	ShopInfo shop;
 
 	@Value
@@ -29,6 +27,8 @@ public class ProductDetailResponse {
 		Integer id;
 		String name;
 		String address;
+		String phone;
+		String imageUrl;
 		BigDecimal latitude;
 		BigDecimal longitude;
 		String description;

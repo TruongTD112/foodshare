@@ -108,8 +108,6 @@ public class OrderService {
 			.status(saved.getStatus())
 			.pickupTime(saved.getPickupTime())
 			.expiresAt(saved.getExpiresAt())
-			.createdAt(saved.getCreatedAt())
-			.updatedAt(saved.getUpdatedAt())
 			.build();
 			
 		log.info("Order created successfully: orderId={}, userId={}, shopId={}, productId={}, quantity={}", 
@@ -242,8 +240,6 @@ public class OrderService {
 			.status(o.getStatus())
 			.pickupTime(o.getPickupTime())
 			.expiresAt(o.getExpiresAt())
-			.createdAt(o.getCreatedAt())
-			.updatedAt(o.getUpdatedAt())
 			.build();
 	}
 }

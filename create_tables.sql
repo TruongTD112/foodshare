@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS Product (
     price DECIMAL(10,2) NOT NULL,
     original_price DECIMAL(10,2) NULL,
     image_url VARCHAR(255),
+    detail_image_url TEXT,
     quantity_available INT,
     quantity_pending INT,
     status VARCHAR(50) NOT NULL,
@@ -24,6 +25,8 @@ CREATE TABLE IF NOT EXISTS Shop (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     address TEXT,
+    phone VARCHAR(20),
+    image_url VARCHAR(255),
     latitude DECIMAL(10,8),
     longitude DECIMAL(11,8),
     description TEXT,
@@ -106,21 +109,21 @@ INSERT INTO Category (name, description, status) VALUES
 ('Đồ uống', 'Nước ngọt, Cà phê, Trà', '1'),
 ('Tráng miệng', 'Bánh ngọt, Kem, Chè', '1');
 
-INSERT INTO Shop (name, address, latitude, longitude, description, rating, status) VALUES 
-('Pizza Corner', '123 Đường ABC, Quận 1, TP.HCM', 10.762622, 106.660172, 'Pizza ngon nhất thành phố', 4.5, '1'),
-('Burger King', '456 Đường XYZ, Quận 2, TP.HCM', 10.763000, 106.661000, 'Burger thơm ngon', 4.2, '1'),
-('Cafe Central', '789 Đường DEF, Quận 3, TP.HCM', 10.764000, 106.662000, 'Cà phê chất lượng cao', 4.8, '1');
+INSERT INTO Shop (name, address, phone, image_url, latitude, longitude, description, rating, status) VALUES 
+('Pizza Corner', '123 Đường ABC, Quận 1, TP.HCM', '0123456789', 'https://example.com/images/pizza-corner-shop.jpg', 10.762622, 106.660172, 'Pizza ngon nhất thành phố', 4.5, '1'),
+('Burger King', '456 Đường XYZ, Quận 2, TP.HCM', '0987654321', 'https://example.com/images/burger-king-shop.jpg', 10.763000, 106.661000, 'Burger thơm ngon', 4.2, '1'),
+('Cafe Central', '789 Đường DEF, Quận 3, TP.HCM', '0369258147', 'https://example.com/images/cafe-central-shop.jpg', 10.764000, 106.662000, 'Cà phê chất lượng cao', 4.8, '1');
 
-INSERT INTO Product (shop_id, category_id, name, description, price, original_price, quantity_available, status) VALUES 
-(1, 1, 'Pizza Margherita', 'Pizza cổ điển với phô mai mozzarella và cà chua', 120000, 150000, 50, '1'),
-(1, 1, 'Pizza Pepperoni', 'Pizza với pepperoni và phô mai thơm ngon', 140000, 180000, 30, '1'),
-(1, 1, 'Pizza Hải Sản', 'Pizza với tôm, mực và cua tươi', 160000, 200000, 25, '1'),
-(2, 1, 'Burger Deluxe', 'Burger với thịt bò và rau tươi', 80000, 100000, 40, '1'),
-(2, 1, 'Chicken Burger', 'Burger gà rán giòn', 70000, 90000, 35, '1'),
-(2, 1, 'Fish Burger', 'Burger cá tươi', 75000, 95000, 20, '1'),
-(3, 2, 'Cà phê đen', 'Cà phê đen đậm đà', 25000, 30000, 100, '1'),
-(3, 2, 'Cà phê sữa', 'Cà phê sữa ngọt ngào', 30000, 35000, 80, '1'),
-(3, 3, 'Bánh Tiramisu', 'Bánh tiramisu Ý thơm ngon', 45000, 55000, 15, '1');
+INSERT INTO Product (shop_id, category_id, name, description, price, original_price, image_url, detail_image_url, quantity_available, status) VALUES 
+(1, 1, 'Pizza Margherita', 'Pizza cổ điển với phô mai mozzarella và cà chua', 120000, 150000, 'https://example.com/images/pizza-margherita.jpg', 'https://example.com/images/pizza-margherita-detail1.jpg,https://example.com/images/pizza-margherita-detail2.jpg,https://example.com/images/pizza-margherita-detail3.jpg', 50, '1'),
+(1, 1, 'Pizza Pepperoni', 'Pizza với pepperoni và phô mai thơm ngon', 140000, 180000, 'https://example.com/images/pizza-pepperoni.jpg', 'https://example.com/images/pizza-pepperoni-detail1.jpg,https://example.com/images/pizza-pepperoni-detail2.jpg', 30, '1'),
+(1, 1, 'Pizza Hải Sản', 'Pizza với tôm, mực và cua tươi', 160000, 200000, 'https://example.com/images/pizza-haisan.jpg', 'https://example.com/images/pizza-haisan-detail1.jpg,https://example.com/images/pizza-haisan-detail2.jpg,https://example.com/images/pizza-haisan-detail3.jpg,https://example.com/images/pizza-haisan-detail4.jpg', 25, '1'),
+(2, 1, 'Burger Deluxe', 'Burger với thịt bò và rau tươi', 80000, 100000, 'https://example.com/images/burger-deluxe.jpg', 'https://example.com/images/burger-deluxe-detail1.jpg,https://example.com/images/burger-deluxe-detail2.jpg', 40, '1'),
+(2, 1, 'Chicken Burger', 'Burger gà rán giòn', 70000, 90000, 'https://example.com/images/chicken-burger.jpg', 'https://example.com/images/chicken-burger-detail1.jpg,https://example.com/images/chicken-burger-detail2.jpg,https://example.com/images/chicken-burger-detail3.jpg', 35, '1'),
+(2, 1, 'Fish Burger', 'Burger cá tươi', 75000, 95000, 'https://example.com/images/fish-burger.jpg', 'https://example.com/images/fish-burger-detail1.jpg,https://example.com/images/fish-burger-detail2.jpg', 20, '1'),
+(3, 2, 'Cà phê đen', 'Cà phê đen đậm đà', 25000, 30000, 'https://example.com/images/cafe-den.jpg', 'https://example.com/images/cafe-den-detail1.jpg,https://example.com/images/cafe-den-detail2.jpg', 100, '1'),
+(3, 2, 'Cà phê sữa', 'Cà phê sữa ngọt ngào', 30000, 35000, 'https://example.com/images/cafe-sua.jpg', 'https://example.com/images/cafe-sua-detail1.jpg,https://example.com/images/cafe-sua-detail2.jpg,https://example.com/images/cafe-sua-detail3.jpg', 80, '1'),
+(3, 3, 'Bánh Tiramisu', 'Bánh tiramisu Ý thơm ngon', 45000, 55000, 'https://example.com/images/banh-tiramisu.jpg', 'https://example.com/images/banh-tiramisu-detail1.jpg,https://example.com/images/banh-tiramisu-detail2.jpg,https://example.com/images/banh-tiramisu-detail3.jpg,https://example.com/images/banh-tiramisu-detail4.jpg,https://example.com/images/banh-tiramisu-detail5.jpg', 15, '1');
 
 INSERT INTO CustomerUser (name, email, phone, address, status) VALUES 
 ('Nguyễn Văn A', 'nguyenvana@email.com', '0123456789', '123 Đường ABC, Quận 1', '1'),

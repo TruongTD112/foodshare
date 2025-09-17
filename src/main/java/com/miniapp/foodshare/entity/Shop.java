@@ -33,6 +33,12 @@ public class Shop {
 	@Column(length = 255)
 	private String address;
 
+	@Column(name = "phone", length = 20)
+	private String phone;
+
+	@Column(name = "image_url", length = 255)
+	private String imageUrl;
+
 	@Column(precision = 10, scale = 8)
 	private BigDecimal latitude;
 

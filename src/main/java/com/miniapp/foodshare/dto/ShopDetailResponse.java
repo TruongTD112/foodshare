@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Value;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Value
@@ -13,13 +12,13 @@ public class ShopDetailResponse {
 	Integer id;
 	String name;
 	String address;
+	String phone;
+	String imageUrl;
 	Double latitude;
 	Double longitude;
 	String description;
 	BigDecimal rating;
 	String status;
-	LocalDateTime createdAt;
-	LocalDateTime updatedAt;
 	List<ProductItem> products;
 
 	@Value
@@ -34,7 +33,5 @@ public class ShopDetailResponse {
 		Integer quantityAvailable;
 		Integer quantityPending;
 		String status;
-		LocalDateTime createdAt;
-		LocalDateTime updatedAt;
 	}
 } 

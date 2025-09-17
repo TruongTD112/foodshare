@@ -56,6 +56,8 @@ public class ShopService {
 			.id(shop.getId())
 			.name(shop.getName())
 			.address(shop.getAddress())
+			.phone(shop.getPhone())
+			.imageUrl(shop.getImageUrl())
 			.latitude(shop.getLatitude() != null ? shop.getLatitude().doubleValue() : null)
 			.longitude(shop.getLongitude() != null ? shop.getLongitude().doubleValue() : null)
 			.description(shop.getDescription())

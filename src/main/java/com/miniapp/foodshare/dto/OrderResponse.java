@@ -16,6 +16,4 @@ public class OrderResponse {
 	String status;
 	LocalDateTime pickupTime;
 	LocalDateTime expiresAt;
-	LocalDateTime createdAt;
-	LocalDateTime updatedAt;
 }
