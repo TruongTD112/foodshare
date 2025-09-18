@@ -551,6 +551,17 @@ public class ProductService {
             return Result.error(ErrorCode.PRODUCT_NOT_FOUND, "Product not found: " + productId);
         }
 
+        // Calculate discount percentage from originalPrice and price (chỉ lấy phần nguyên)
+        BigDecimal discountPercentage = BigDecimal.ZERO;
+        if (product.getOriginalPrice() != null && product.getPrice() != null && product.getOriginalPrice().compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal discountAmount = product.getOriginalPrice().subtract(product.getPrice());
+            discountPercentage = discountAmount.divide(product.getOriginalPrice(), 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP);
+        }
+
+        // Lấy thông tin totalOrders từ ProductSalesStats
+        ProductSalesStats salesStats = productSalesStatsRepository.findByProductId(product.getId()).orElse(null);
+        Integer totalOrders = salesStats != null ? salesStats.getTotalOrders() : 0;
+
         ProductDetailResponse.ShopInfo shopInfo = ProductDetailResponse.ShopInfo.builder()
                 .id(shop.getId())
                 .name(shop.getName())
@@ -571,11 +582,14 @@ public class ProductService {
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
+                .originalPrice(product.getOriginalPrice())
+                .discountPercentage(discountPercentage)
                 .imageUrl(product.getImageUrl())
                 .detailImageUrl(product.getDetailImageUrl())
                 .quantityAvailable(product.getQuantityAvailable())
                 .quantityPending(product.getQuantityPending())
                 .status(product.getStatus())
+                .totalOrders(totalOrders)
                 .shop(shopInfo)
                 .build();
 
