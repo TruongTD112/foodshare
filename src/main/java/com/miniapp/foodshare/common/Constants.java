@@ -24,12 +24,12 @@ public final class Constants {
      * Order status constants
      */
     public static final class OrderStatus {
-        public static final String PENDING = "pending";
-        public static final String CONFIRMED = "confirmed";
+        public static final String PENDING = "1";
+        public static final String CONFIRMED = "2";
         public static final String PREPARING = "preparing";
         public static final String READY = "ready";
-        public static final String COMPLETED = "completed";
-        public static final String CANCELLED = "cancelled";
+        public static final String COMPLETED = "4";
+        public static final String CANCELLED = "3";
         
         private OrderStatus() {}
     }

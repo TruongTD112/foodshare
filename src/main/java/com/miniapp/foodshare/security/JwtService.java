@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -15,12 +16,12 @@ public class JwtService {
 	private static final String SECRET = "bXktdmVyeS1sb25nLXNlY3JldC1rZXktZm9yLWRlbW8tb25seS0xMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMw==";
 	private static final long EXP_MS = 1000L * 60 * 60 * 24; // 24h
 
-	private Key getSigningKey() {
+	private static Key getSigningKey() {
 		byte[] keyBytes = Decoders.BASE64.decode(SECRET);
 		return Keys.hmacShaKeyFor(keyBytes);
 	}
 
-	public String generateToken(String subject, Map<String, Object> claims) {
+	public static String generateToken(String subject, Map<String, Object> claims) {
 		Date now = new Date();
 		Date exp = new Date(now.getTime() + EXP_MS);
 		return Jwts.builder()
@@ -52,5 +53,14 @@ public class JwtService {
 		Claims c = parse(token).getBody();
 		Object email = c.get("email");
 		return email != null ? email.toString() : null;
+	}
+
+	public static void main(String[] args) {
+		Map<String, Object> claims = new HashMap<>();
+		claims.put("uid", 1);
+		claims.put("email", "truongtb1999@gmail.com");
+		claims.put("provider", "Facebook");
+		String jwt = generateToken("user:" + 1, claims);
+		System.out.println(jwt);
 	}
 }

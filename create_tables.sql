@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS `Order` (
     status VARCHAR(50) NOT NULL,
     pickup_time DATETIME,
     expires_at DATETIME,
+    unit_price DECIMAL(10,2),
+    total_price DECIMAL(10,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

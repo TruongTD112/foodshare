@@ -33,7 +33,9 @@ public class OrderController {
 			.shopId(request.getShopId())
 			.productId(request.getProductId())
 			.quantity(request.getQuantity())
-			.pickupInMinutes(request.getPickupInMinutes())
+			.pickupTime(request.getPickupTime())
+			.unitPrice(request.getUnitPrice())
+			.totalPrice(request.getTotalPrice())
 			.build();
 		Result<OrderResponse> result = orderService.createOrder(effective);
 		if (result.isSuccess()) {

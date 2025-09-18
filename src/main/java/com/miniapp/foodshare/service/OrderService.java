@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,10 +79,45 @@ public class OrderService {
 			return Result.error(ErrorCode.INSUFFICIENT_STOCK, "Insufficient stock");
 		}
 
-		int pickupMinutes = req.getPickupInMinutes() != null && req.getPickupInMinutes() > 0 ? 
-			Math.min(req.getPickupInMinutes(), Constants.Time.MAX_PICKUP_MINUTES) : Constants.Time.DEFAULT_PICKUP_MINUTES;
+		// Validate pickup time
+		LocalDateTime pickupTime = req.getPickupTime();
+		if (pickupTime == null) {
+			log.warn("Pickup time is required: userId={}, productId={}", req.getUserId(), req.getProductId());
+			return Result.error(ErrorCode.INVALID_REQUEST, "Pickup time is required");
+		}
+		
+		// Validate pickup time is in the future
 		LocalDateTime now = LocalDateTime.now();
-		LocalDateTime pickupTime = now.plusMinutes(pickupMinutes);
+		if (pickupTime.isBefore(now)) {
+			log.warn("Pickup time must be in the future: userId={}, productId={}, pickupTime={}", 
+					req.getUserId(), req.getProductId(), pickupTime);
+			return Result.error(ErrorCode.INVALID_REQUEST, "Pickup time must be in the future");
+		}
+		
+		// Validate unit price
+		BigDecimal unitPrice = req.getUnitPrice();
+		if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
+			log.warn("Unit price must be greater than 0: userId={}, productId={}, unitPrice={}", 
+					req.getUserId(), req.getProductId(), unitPrice);
+			return Result.error(ErrorCode.INVALID_REQUEST, "Unit price must be greater than 0");
+		}
+		
+		// Validate total price
+		BigDecimal totalPrice = req.getTotalPrice();
+		if (totalPrice == null || totalPrice.compareTo(BigDecimal.ZERO) <= 0) {
+			log.warn("Total price must be greater than 0: userId={}, productId={}, totalPrice={}", 
+					req.getUserId(), req.getProductId(), totalPrice);
+			return Result.error(ErrorCode.INVALID_REQUEST, "Total price must be greater than 0");
+		}
+		
+		// Validate total price calculation
+		BigDecimal expectedTotal = unitPrice.multiply(BigDecimal.valueOf(req.getQuantity()));
+		if (totalPrice.compareTo(expectedTotal) != 0) {
+			log.warn("Total price calculation mismatch: userId={}, productId={}, expected={}, actual={}", 
+					req.getUserId(), req.getProductId(), expectedTotal, totalPrice);
+			return Result.error(ErrorCode.INVALID_REQUEST, "Total price calculation is incorrect");
+		}
+		
 		LocalDateTime expiresAt = pickupTime.plusMinutes(Constants.Time.ORDER_EXPIRY_MINUTES);
 
 		Order order = Order.builder()
@@ -92,6 +128,8 @@ public class OrderService {
 			.status(Constants.OrderStatus.PENDING)
 			.pickupTime(pickupTime)
 			.expiresAt(expiresAt)
+			.unitPrice(unitPrice)
+			.totalPrice(totalPrice)
 			.build();
 
 		Order saved = orderRepository.save(order);
@@ -108,6 +146,8 @@ public class OrderService {
 			.status(saved.getStatus())
 			.pickupTime(saved.getPickupTime())
 			.expiresAt(saved.getExpiresAt())
+			.unitPrice(saved.getUnitPrice())
+			.totalPrice(saved.getTotalPrice())
 			.build();
 			
 		log.info("Order created successfully: orderId={}, userId={}, shopId={}, productId={}, quantity={}", 
@@ -240,6 +280,8 @@ public class OrderService {
 			.status(o.getStatus())
 			.pickupTime(o.getPickupTime())
 			.expiresAt(o.getExpiresAt())
+			.unitPrice(o.getUnitPrice())
+			.totalPrice(o.getTotalPrice())
 			.build();
 	}
 }

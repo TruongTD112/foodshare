@@ -12,10 +12,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Order")
+@Table(name = "`Order`")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -46,6 +47,12 @@ public class Order {
 
 	@Column(name = "expires_at")
 	private LocalDateTime expiresAt;
+
+	@Column(name = "unit_price")
+	private BigDecimal unitPrice;
+
+	@Column(name = "total_price")
+	private BigDecimal totalPrice;
 
 	@Column(name = "created_at", insertable = false, updatable = false)
 	private LocalDateTime createdAt;

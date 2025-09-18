@@ -3,6 +3,9 @@ package com.miniapp.foodshare.dto;
 import lombok.Builder;
 import lombok.Value;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Value
 @Builder
 public class OrderCreateRequest {
@@ -10,6 +13,7 @@ public class OrderCreateRequest {
 	Integer shopId;
 	Integer productId;
 	Integer quantity;
-	// optional pickupTime minutes from now; if null, use default window
-	Integer pickupInMinutes;
+	LocalDateTime pickupTime; // Ngày và giờ đặt hàng
+	BigDecimal unitPrice; // Giá trên từng sản phẩm tại thời điểm đặt
+	BigDecimal totalPrice; // Tổng giá của đơn hàng
 }

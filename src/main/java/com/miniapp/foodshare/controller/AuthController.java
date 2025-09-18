@@ -19,7 +19,7 @@ public class AuthController {
 	public Result<SocialLoginResponse> socialLogin(@RequestBody SocialLoginRequest request) {
 		Result<SocialLoginResponse> result = socialAuthService.login(request);
 		if (result.isSuccess()) {
-			log.info("Social login successful: userId={}, provider={}", 
+			log.info("Social login successful: userId={}, provider={}",
 				result.getData().getUserId(), result.getData().getProvider());
 		} else {
 			log.warn("Social login failed: code={}, message={}", result.getCode(), result.getMessage());

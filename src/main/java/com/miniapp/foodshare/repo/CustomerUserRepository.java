@@ -23,4 +23,6 @@ public interface CustomerUserRepository extends JpaRepository<CustomerUser, Inte
      * Kiểm tra email đã tồn tại chưa (trừ user hiện tại)
      */
     boolean existsByEmailAndIdNot(String email, Integer id);
+
+    Optional<CustomerUser> findByProviderId(String providerId);
 }
