@@ -1,0 +1,534 @@
+{
+	"info": {
+		"_postman_id": "order-api-collection",
+		"name": "Order API Collection",
+		"description": "Collection cho các API đơn hàng - FoodShare App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Social Login - User 1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"google\",\n  \"providerId\": \"google_123\",\n  \"email\": \"user1@example.com\",\n  \"name\": \"User 1\",\n  \"profilePictureUrl\": \"https://example.com/avatar1.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/social",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"social"
+							]
+						},
+						"description": "Tạo token cho User 1"
+					},
+					"response": []
+				},
+				{
+					"name": "Social Login - User 2",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"google\",\n  \"providerId\": \"google_456\",\n  \"email\": \"user2@example.com\",\n  \"name\": \"User 2\",\n  \"profilePictureUrl\": \"https://example.com/avatar2.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/social",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"social"
+							]
+						},
+						"description": "Tạo token cho User 2"
+					},
+					"response": []
+				},
+				{
+					"name": "Social Login - User 3",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"google\",\n  \"providerId\": \"google_789\",\n  \"email\": \"user3@example.com\",\n  \"name\": \"User 3\",\n  \"profilePictureUrl\": \"https://example.com/avatar3.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/social",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"social"
+							]
+						},
+						"description": "Tạo token cho User 3"
+					},
+					"response": []
+				}
+			],
+			"description": "APIs xác thực và tạo token"
+		},
+		{
+			"name": "Order Management",
+			"item": [
+				{
+					"name": "Create Order - Pizza Margherita",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"productId\": 1,\n  \"quantity\": 2,\n  \"pickupTime\": \"2024-01-15T14:30:00\",\n  \"unitPrice\": 150000.00,\n  \"totalPrice\": 300000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Đặt đơn hàng Pizza Margherita\n\nResponse sẽ trả về order ID trong field 'id' của data object:\n{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,  // ← Order ID cho client\n    \"userId\": 1,\n    \"shopId\": 1,\n    \"productId\": 1,\n    \"quantity\": 2,\n    \"status\": \"pending\",\n    \"pickupTime\": \"2024-01-15T14:30:00\",\n    \"expiresAt\": \"2024-01-15T15:30:00\",\n    \"unitPrice\": 150000.00,\n    \"totalPrice\": 300000.00\n  }\n}"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order - Pizza Pepperoni",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"productId\": 2,\n  \"quantity\": 1,\n  \"pickupTime\": \"2024-01-15T16:00:00\",\n  \"unitPrice\": 180000.00,\n  \"totalPrice\": 180000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Đặt đơn hàng Pizza Pepperoni"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order - Burger Deluxe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 2,\n  \"productId\": 4,\n  \"quantity\": 3,\n  \"pickupTime\": \"2024-01-15T18:30:00\",\n  \"unitPrice\": 120000.00,\n  \"totalPrice\": 360000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Đặt đơn hàng Burger Deluxe"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Lấy tất cả đơn hàng của user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Orders by Status - Pending",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders?status=pending",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "pending"
+								}
+							]
+						},
+						"description": "Lấy đơn hàng có status pending"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Orders by Status - Completed",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders?status=completed",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "completed"
+								}
+							]
+						},
+						"description": "Lấy đơn hàng có status completed"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Orders by Status - Cancelled",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders?status=cancelled",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "cancelled"
+								}
+							]
+						},
+						"description": "Lấy đơn hàng có status cancelled"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}"
+							]
+						},
+						"description": "Hủy đơn hàng theo ID"
+					},
+					"response": []
+				}
+			],
+			"description": "APIs quản lý đơn hàng"
+		},
+		{
+			"name": "Error Testing",
+			"item": [
+				{
+					"name": "Create Order - Missing Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"productId\": 1,\n  \"quantity\": 1,\n  \"pickupTime\": \"2024-01-15T14:30:00\",\n  \"unitPrice\": 150000.00,\n  \"totalPrice\": 150000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Test lỗi khi thiếu token"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order - Invalid Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer invalid_token_123"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"productId\": 1,\n  \"quantity\": 1,\n  \"pickupTime\": \"2024-01-15T14:30:00\",\n  \"unitPrice\": 150000.00,\n  \"totalPrice\": 150000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Test lỗi khi token không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order - Missing Pickup Time",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"productId\": 1,\n  \"quantity\": 1,\n  \"unitPrice\": 150000.00,\n  \"totalPrice\": 150000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Test lỗi khi thiếu pickup time"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order - Invalid Price Calculation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"productId\": 1,\n  \"quantity\": 2,\n  \"pickupTime\": \"2024-01-15T14:30:00\",\n  \"unitPrice\": 150000.00,\n  \"totalPrice\": 200000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Test lỗi khi tính toán tổng giá sai"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order - Past Pickup Time",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"productId\": 1,\n  \"quantity\": 1,\n  \"pickupTime\": \"2023-01-01T10:00:00\",\n  \"unitPrice\": 150000.00,\n  \"totalPrice\": 150000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Test lỗi khi pickup time trong quá khứ"
+					},
+					"response": []
+				}
+			],
+			"description": "Test các trường hợp lỗi"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-generate pickup time for next 30 minutes",
+					"const now = new Date();",
+					"const pickupTime = new Date(now.getTime() + 30 * 60000);",
+					"const pickupTimeString = pickupTime.toISOString().slice(0, 19);",
+					"",
+					"// Set pickup time variable",
+					"pm.environment.set('pickup_time', pickupTimeString);",
+					"",
+					"console.log('Auto-generated pickup time:', pickupTimeString);"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string",
+			"description": "JWT token từ social login"
+		},
+		{
+			"key": "order_id",
+			"value": "1",
+			"type": "string",
+			"description": "ID của đơn hàng để test cancel"
+		},
+		{
+			"key": "pickup_time",
+			"value": "",
+			"type": "string",
+			"description": "Thời gian pickup tự động tạo"
+		}
+	]
+}

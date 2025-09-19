@@ -55,12 +55,8 @@ public class UserService {
                 .id(savedUser.getId())
                 .name(savedUser.getName())
                 .email(savedUser.getEmail())
-                .provider(savedUser.getProvider())
-                .providerId(savedUser.getProviderId())
-                .profilePictureUrl(savedUser.getProfilePictureUrl())
                 .phoneNumber(savedUser.getPhoneNumber())
-                .createdAt(savedUser.getCreatedAt())
-                .updatedAt(savedUser.getUpdatedAt())
+                .profilePictureUrl(savedUser.getProfilePictureUrl())
                 .build();
         
         log.info("User updated successfully: userId={}, name={}, email={}", 
@@ -87,12 +83,8 @@ public class UserService {
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
-                .provider(user.getProvider())
-                .providerId(user.getProviderId())
-                .profilePictureUrl(user.getProfilePictureUrl())
                 .phoneNumber(user.getPhoneNumber())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .build();
         
         log.info("User info retrieved successfully: userId={}, name={}", userId, user.getName());

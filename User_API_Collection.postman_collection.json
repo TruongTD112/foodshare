@@ -1,0 +1,302 @@
+{
+	"info": {
+		"_postman_id": "user-api-collection",
+		"name": "User API Collection",
+		"description": "Collection cho các API quản lý thông tin người dùng - FoodShare App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Social Login - User 1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"google\",\n  \"providerId\": \"google_123\",\n  \"email\": \"user1@example.com\",\n  \"name\": \"User 1\",\n  \"profilePictureUrl\": \"https://example.com/avatar1.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/social",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"social"
+							]
+						},
+						"description": "Tạo token cho User 1"
+					},
+					"response": []
+				}
+			],
+			"description": "APIs xác thực và tạo token"
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get User Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Lấy thông tin người dùng\n\nResponse chỉ trả về:\n- id\n- name\n- email\n- phoneNumber\n- profilePictureUrl\n\nĐã bỏ:\n- provider\n- providerId\n- createdAt\n- updatedAt"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Info",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"User 1 Updated\",\n  \"email\": \"user1.updated@example.com\",\n  \"phoneNumber\": \"0123456789\",\n  \"profilePictureUrl\": \"https://example.com/avatar1_updated.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Cập nhật thông tin người dùng\n\nResponse chỉ trả về:\n- id\n- name\n- email\n- phoneNumber\n- profilePictureUrl\n\nĐã bỏ:\n- provider\n- providerId\n- createdAt\n- updatedAt"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Info - Minimal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"User 1\",\n  \"email\": \"user1@example.com\",\n  \"phoneNumber\": \"0987654321\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Cập nhật thông tin tối thiểu (không có profilePictureUrl)"
+					},
+					"response": []
+				}
+			],
+			"description": "APIs quản lý thông tin người dùng"
+		},
+		{
+			"name": "Error Testing",
+			"item": [
+				{
+					"name": "Get User Info - Missing Token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"1"
+							]
+						},
+						"description": "Test lỗi khi thiếu token"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Info - Invalid User ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"999"
+							]
+						},
+						"description": "Test lỗi khi user ID không tồn tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Info - Invalid Email",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"User 1\",\n  \"email\": \"invalid-email\",\n  \"phoneNumber\": \"0123456789\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Test lỗi khi email không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Info - Missing Required Fields",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"email\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Test lỗi khi thiếu các field bắt buộc"
+					},
+					"response": []
+				}
+			],
+			"description": "Test các trường hợp lỗi"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set user_id from token if available",
+					"const token = pm.environment.get('token');",
+					"if (token) {",
+					"    // Extract user ID from token (simplified)",
+					"    try {",
+					"        const payload = JSON.parse(atob(token.split('.')[1]));",
+					"        const userId = payload.uid;",
+					"        if (userId) {",
+					"            pm.environment.set('user_id', userId);",
+					"            console.log('Auto-set user_id from token:', userId);",
+					"        }",
+					"    } catch (e) {",
+					"        console.log('Could not extract user_id from token');",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string",
+			"description": "JWT token từ social login"
+		},
+		{
+			"key": "user_id",
+			"value": "1",
+			"type": "string",
+			"description": "ID của user để test"
+		}
+	]
+}
