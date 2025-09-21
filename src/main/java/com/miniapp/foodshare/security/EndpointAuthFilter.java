@@ -120,7 +120,7 @@ public class EndpointAuthFilter extends OncePerRequestFilter {
 		try {
 			Jws<Claims> claims = jwtService.parse(token);
 			String role = claims.getBody().get("role", String.class);
-			return "ADMIN".equals(role);
+			return "ADMIN".equalsIgnoreCase(role);
 		} catch (Exception e) {
 			log.error("Error checking admin role from token", e);
 			return false;
@@ -134,7 +134,7 @@ public class EndpointAuthFilter extends OncePerRequestFilter {
 		try {
 			Jws<Claims> claims = jwtService.parse(token);
 			String role = claims.getBody().get("role", String.class);
-			return "SELLER".equals(role) || "ADMIN".equals(role);
+			return "SELLER".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role);
 		} catch (Exception e) {
 			log.error("Error checking seller/admin role from token", e);
 			return false;
