@@ -1,0 +1,211 @@
+{
+  "info": {
+    "name": "Products By Shop API Collection",
+    "description": "Collection test API lấy sản phẩm theo Shop ID",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Tạo sản phẩm cho Shop 1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"shopId\": 1,\n  \"categoryId\": null,\n  \"name\": \"Pizza Margherita Shop 1\",\n  \"description\": \"Pizza cổ điển từ shop 1\",\n  \"price\": 150000.00,\n  \"originalPrice\": 180000.00,\n  \"imageUrl\": \"https://example.com/pizza_shop1.jpg\",\n  \"detailImageUrl\": \"https://example.com/pizza_shop1_detail.jpg\",\n  \"quantityAvailable\": 50,\n  \"status\": \"available\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/admin/products",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Tạo sản phẩm thứ 2 cho Shop 1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"shopId\": 1,\n  \"categoryId\": null,\n  \"name\": \"Burger Deluxe Shop 1\",\n  \"description\": \"Burger cao cấp từ shop 1\",\n  \"price\": 120000.00,\n  \"originalPrice\": 150000.00,\n  \"imageUrl\": \"https://example.com/burger_shop1.jpg\",\n  \"detailImageUrl\": \"https://example.com/burger_shop1_detail.jpg\",\n  \"quantityAvailable\": 30,\n  \"status\": \"available\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/admin/products",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Tạo sản phẩm cho Shop 2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"shopId\": 2,\n  \"categoryId\": null,\n  \"name\": \"Pizza Margherita Shop 2\",\n  \"description\": \"Pizza cổ điển từ shop 2\",\n  \"price\": 160000.00,\n  \"originalPrice\": 200000.00,\n  \"imageUrl\": \"https://example.com/pizza_shop2.jpg\",\n  \"detailImageUrl\": \"https://example.com/pizza_shop2_detail.jpg\",\n  \"quantityAvailable\": 40,\n  \"status\": \"available\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/admin/products",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Lấy sản phẩm theo Shop ID 1",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/admin/products/shop/1",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products", "shop", "1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Lấy sản phẩm theo Shop ID 2",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/admin/products/shop/2",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products", "shop", "2"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. Lấy sản phẩm theo Shop ID 3 (không tồn tại)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/admin/products/shop/3",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products", "shop", "3"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Lấy tất cả sản phẩm",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/admin/products",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10. Lấy sản phẩm theo Shop ID 1 và trạng thái available",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/admin/products/shop/1/status/available",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products", "shop", "1", "status", "available"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11. Lấy sản phẩm theo Shop ID 1 và trạng thái sold_out",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/admin/products/shop/1/status/sold_out",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products", "shop", "1", "status", "sold_out"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "12. Lấy sản phẩm theo Shop ID 1 và trạng thái no_longer_sell",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/admin/products/shop/1/status/3",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products", "shop", "1", "status", "3"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "13. Lấy sản phẩm theo Shop ID 2 và trạng thái 1 (available)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/admin/products/shop/2/status/1",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products", "shop", "2", "status", "1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "14. Test Shop không tồn tại",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/admin/products/shop/999/status/1",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products", "shop", "999", "status", "1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "15. Test trạng thái không hợp lệ",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/admin/products/shop/1/status/4",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "products", "shop", "1", "status", "4"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    }
+  ]
+}

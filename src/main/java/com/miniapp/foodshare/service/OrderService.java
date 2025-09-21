@@ -5,6 +5,7 @@ import com.miniapp.foodshare.common.ErrorCode;
 import com.miniapp.foodshare.common.Constants;
 import com.miniapp.foodshare.dto.OrderCreateRequest;
 import com.miniapp.foodshare.dto.OrderResponse;
+import com.miniapp.foodshare.dto.UpdateOrderStatusRequest;
 import com.miniapp.foodshare.entity.Order;
 import com.miniapp.foodshare.entity.Product;
 import com.miniapp.foodshare.entity.Shop;
@@ -268,6 +269,102 @@ public class OrderService {
 		OrderResponse response = map(saved);
 		log.info("Order cancelled successfully: orderId={}, userId={}", orderId, userId);
 		return Result.success(response);
+	}
+
+	/**
+	 * Cập nhật trạng thái đơn hàng (API duy nhất)
+	 * Hỗ trợ tất cả các trạng thái: pending, confirmed, preparing, ready, completed, cancelled
+	 */
+	@Transactional
+	public Result<OrderResponse> updateOrderStatus(Integer orderId, UpdateOrderStatusRequest request) {
+		try {
+			// Validate order exists
+			Order order = orderRepository.findById(orderId).orElse(null);
+			if (order == null) {
+				log.warn("Order not found: orderId={}", orderId);
+				return Result.error(ErrorCode.ORDER_NOT_FOUND, "Order not found");
+			}
+
+			String currentStatus = order.getStatus();
+			String newStatus = request.getStatus();
+
+			// Validate status transition
+			if (!isValidStatusTransition(currentStatus, newStatus)) {
+				log.warn("Invalid status transition: orderId={}, from={}, to={}", orderId, currentStatus, newStatus);
+				return Result.error(ErrorCode.INVALID_ORDER_STATUS, 
+					String.format("Cannot change status from %s to %s", currentStatus, newStatus));
+			}
+
+			// Update order status
+			order.setStatus(newStatus);
+			Order savedOrder = orderRepository.save(order);
+
+			// Handle business logic based on status change
+			handleStatusChangeBusinessLogic(order, currentStatus, newStatus);
+
+			OrderResponse response = map(savedOrder);
+			log.info("Order status updated successfully: orderId={}, from={}, to={}", 
+				orderId, currentStatus, newStatus);
+			return Result.success(response);
+
+		} catch (Exception e) {
+			log.error("Error updating order status: orderId={}, status={}", orderId, request.getStatus(), e);
+			return Result.error(ErrorCode.INTERNAL_ERROR, "Failed to update order status");
+		}
+	}
+
+	/**
+	 * Kiểm tra chuyển đổi trạng thái có hợp lệ không
+	 */
+	private boolean isValidStatusTransition(String currentStatus, String newStatus) {
+		if (currentStatus == null || newStatus == null) {
+			return false;
+		}
+
+		// Không thể thay đổi trạng thái đã completed hoặc cancelled
+		if (Constants.OrderStatus.COMPLETED.equals(currentStatus) || 
+			Constants.OrderStatus.CANCELLED.equals(currentStatus)) {
+			return false;
+		}
+
+		// Có thể chuyển sang bất kỳ trạng thái nào từ pending
+		if (Constants.OrderStatus.PENDING.equals(currentStatus)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Xử lý logic nghiệp vụ khi thay đổi trạng thái
+	 */
+	private void handleStatusChangeBusinessLogic(Order order, String oldStatus, String newStatus) {
+		// Khi chuyển sang completed, cập nhật thống kê bán hàng
+		if (Constants.OrderStatus.COMPLETED.equals(newStatus)) {
+			updateSalesStats(order.getProductId(), order.getQuantity());
+			
+			// Giảm quantityPending trong Product
+			Product product = productRepository.findById(order.getProductId()).orElse(null);
+			if (product != null) {
+				Integer currentPending = product.getQuantityPending() != null ? product.getQuantityPending() : 0;
+				product.setQuantityPending(currentPending - order.getQuantity());
+				productRepository.save(product);
+			}
+		}
+
+		// Khi chuyển sang cancelled, hoàn trả quantity
+		if (Constants.OrderStatus.CANCELLED.equals(newStatus)) {
+			Product product = productRepository.findById(order.getProductId()).orElse(null);
+			if (product != null) {
+				Integer currentAvailable = product.getQuantityAvailable() != null ? product.getQuantityAvailable() : 0;
+				Integer currentPending = product.getQuantityPending() != null ? product.getQuantityPending() : 0;
+				
+				// Tăng lại quantityAvailable và giảm quantityPending
+				product.setQuantityAvailable(currentAvailable + order.getQuantity());
+				product.setQuantityPending(currentPending - order.getQuantity());
+				productRepository.save(product);
+			}
+		}
 	}
 
 	private OrderResponse map(Order o) {

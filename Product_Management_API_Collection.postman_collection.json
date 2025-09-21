@@ -1,0 +1,609 @@
+{
+	"info": {
+		"_postman_id": "product-management-api-collection",
+		"name": "Product Management API Collection",
+		"description": "Collection cho các API quản lý sản phẩm (Admin) - FoodShare App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Product Management",
+			"item": [
+				{
+					"name": "Create Product - Pizza Margherita",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"categoryId\": 1,\n  \"name\": \"Pizza Margherita New\",\n  \"description\": \"Pizza cổ điển với cà chua, mozzarella và húng quế tươi\",\n  \"price\": 150000.00,\n  \"originalPrice\": 180000.00,\n  \"imageUrl\": \"https://example.com/pizza_margherita_new.jpg\",\n  \"detailImageUrl\": \"https://example.com/pizza_margherita_detail.jpg\",\n  \"quantityAvailable\": 50,\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products"
+							]
+						},
+						"description": "Tạo sản phẩm Pizza Margherita mới"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Burger Deluxe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 2,\n  \"categoryId\": 2,\n  \"name\": \"Burger Deluxe New\",\n  \"description\": \"Burger cao cấp với thịt bò wagyu và phô mai cheddar\",\n  \"price\": 120000.00,\n  \"originalPrice\": 150000.00,\n  \"imageUrl\": \"https://example.com/burger_deluxe_new.jpg\",\n  \"detailImageUrl\": \"https://example.com/burger_deluxe_detail.jpg\",\n  \"quantityAvailable\": 30,\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products"
+							]
+						},
+						"description": "Tạo sản phẩm Burger Deluxe"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Out of Stock",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"categoryId\": 3,\n  \"name\": \"Cafe Latte Special\",\n  \"description\": \"Cafe latte đặc biệt với hương vị độc đáo\",\n  \"price\": 45000.00,\n  \"originalPrice\": 50000.00,\n  \"imageUrl\": \"https://example.com/cafe_latte_special.jpg\",\n  \"detailImageUrl\": \"https://example.com/cafe_latte_detail.jpg\",\n  \"quantityAvailable\": 0,\n  \"status\": \"out_of_stock\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products"
+							]
+						},
+						"description": "Tạo sản phẩm với trạng thái out of stock"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Lấy thông tin sản phẩm theo ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product - Full Update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Pizza Margherita Updated\",\n  \"description\": \"Pizza cổ điển đã được cập nhật với nguyên liệu cao cấp\",\n  \"price\": 160000.00,\n  \"originalPrice\": 200000.00,\n  \"imageUrl\": \"https://example.com/pizza_margherita_updated.jpg\",\n  \"detailImageUrl\": \"https://example.com/pizza_margherita_detail_updated.jpg\",\n  \"quantityAvailable\": 60,\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Cập nhật đầy đủ thông tin sản phẩm"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product - Partial Update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Pizza Margherita Renamed\",\n  \"price\": 170000.00,\n  \"quantityAvailable\": 70,\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Cập nhật một phần thông tin sản phẩm"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products"
+							]
+						},
+						"description": "Lấy danh sách tất cả sản phẩm"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products by Shop ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/shop/{{shop_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"shop",
+								"{{shop_id}}"
+							]
+						},
+						"description": "Lấy danh sách sản phẩm theo shop ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products by Status - Active",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/status/active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"status",
+								"active"
+							]
+						},
+						"description": "Lấy danh sách sản phẩm có trạng thái active"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products by Status - Inactive",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/status/inactive",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"status",
+								"inactive"
+							]
+						},
+						"description": "Lấy danh sách sản phẩm có trạng thái inactive"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products by Status - Out of Stock",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/status/out_of_stock",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"status",
+								"out_of_stock"
+							]
+						},
+						"description": "Lấy danh sách sản phẩm có trạng thái out_of_stock"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products by Category ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/category/{{category_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"category",
+								"{{category_id}}"
+							]
+						},
+						"description": "Lấy danh sách sản phẩm theo category ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Xóa sản phẩm theo ID"
+					},
+					"response": []
+				}
+			],
+			"description": "APIs quản lý sản phẩm"
+		},
+		{
+			"name": "Error Testing",
+			"item": [
+				{
+					"name": "Create Product - Missing Required Fields",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"price\": 100000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products"
+							]
+						},
+						"description": "Test lỗi khi thiếu các field bắt buộc"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Invalid Price Relationship",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"categoryId\": 1,\n  \"name\": \"Invalid Price Product\",\n  \"price\": 200000.00,\n  \"originalPrice\": 150000.00,\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products"
+							]
+						},
+						"description": "Test lỗi khi giá gốc nhỏ hơn giá hiện tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Invalid Shop ID",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 999,\n  \"categoryId\": 1,\n  \"name\": \"Invalid Shop Product\",\n  \"price\": 100000.00,\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products"
+							]
+						},
+						"description": "Test lỗi khi shop ID không tồn tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Invalid Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"categoryId\": 1,\n  \"name\": \"Invalid Status Product\",\n  \"price\": 100000.00,\n  \"status\": \"invalid_status\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products"
+							]
+						},
+						"description": "Test lỗi khi trạng thái không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product - Non-existent ID",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Non-existent Product\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"999"
+							]
+						},
+						"description": "Test lỗi khi cập nhật sản phẩm không tồn tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product - Non-existent ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"999"
+							]
+						},
+						"description": "Test lỗi khi lấy thông tin sản phẩm không tồn tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product - Non-existent ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"999"
+							]
+						},
+						"description": "Test lỗi khi xóa sản phẩm không tồn tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products by Status - Invalid Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/products/status/invalid",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"products",
+								"status",
+								"invalid"
+							]
+						},
+						"description": "Test lỗi khi trạng thái không hợp lệ"
+					},
+					"response": []
+				}
+			],
+			"description": "Test các trường hợp lỗi"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set product_id from previous create response if available",
+					"const productId = pm.environment.get('product_id');",
+					"if (!productId || productId === '') {",
+					"    // Set default product ID for testing",
+					"    pm.environment.set('product_id', '1');",
+					"    console.log('Set default product_id: 1');",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-extract product_id from create product response",
+					"if (pm.response.code === 200) {",
+					"    const response = pm.response.json();",
+					"    if (response.success && response.data && response.data.id) {",
+					"        pm.environment.set('product_id', response.data.id);",
+					"        console.log('Auto-set product_id from response:', response.data.id);",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "product_id",
+			"value": "1",
+			"type": "string",
+			"description": "ID của sản phẩm để test"
+		},
+		{
+			"key": "shop_id",
+			"value": "1",
+			"type": "string",
+			"description": "ID của shop để test"
+		},
+		{
+			"key": "category_id",
+			"value": "1",
+			"type": "string",
+			"description": "ID của category để test"
+		}
+	]
+}

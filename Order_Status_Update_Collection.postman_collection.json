@@ -1,0 +1,454 @@
+{
+	"info": {
+		"_postman_id": "order-status-update-collection",
+		"name": "Order Status Update API Collection",
+		"description": "Collection cho API cập nhật trạng thái đơn hàng - FoodShare App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Order Status Update",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shopId\": 1,\n  \"productId\": 1,\n  \"quantity\": 2,\n  \"pickupTime\": \"2024-01-15T14:30:00\",\n  \"unitPrice\": 150000.00,\n  \"totalPrice\": 300000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Tạo đơn hàng mới để test cập nhật trạng thái"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status - PENDING to CONFIRMED",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}",
+								"status"
+							]
+						},
+						"description": "Cập nhật trạng thái từ PENDING sang CONFIRMED"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status - CONFIRMED to PREPARING",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"preparing\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}",
+								"status"
+							]
+						},
+						"description": "Cập nhật trạng thái từ CONFIRMED sang PREPARING"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status - PREPARING to READY",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"ready\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}",
+								"status"
+							]
+						},
+						"description": "Cập nhật trạng thái từ PREPARING sang READY"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status - READY to COMPLETED",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}",
+								"status"
+							]
+						},
+						"description": "Cập nhật trạng thái từ READY sang COMPLETED"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status - PENDING to CANCELLED",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"cancelled\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}",
+								"status"
+							]
+						},
+						"description": "Cập nhật trạng thái từ PENDING sang CANCELLED"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Lấy danh sách đơn hàng để xem trạng thái"
+					},
+					"response": []
+				}
+			],
+			"description": "APIs cập nhật trạng thái đơn hàng"
+		},
+		{
+			"name": "Error Testing",
+			"item": [
+				{
+					"name": "Update Status - Invalid Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"invalid_status\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}",
+								"status"
+							]
+						},
+						"description": "Test lỗi khi trạng thái không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status - Missing Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}",
+								"status"
+							]
+						},
+						"description": "Test lỗi khi thiếu trạng thái"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status - Non-existent Order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/999/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"999",
+								"status"
+							]
+						},
+						"description": "Test lỗi khi đơn hàng không tồn tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status - Invalid Transition (COMPLETED to PENDING)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"pending\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}",
+								"status"
+							]
+						},
+						"description": "Test lỗi khi chuyển đổi trạng thái không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Status - Unauthorized",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/{{order_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{order_id}}",
+								"status"
+							]
+						},
+						"description": "Test lỗi khi không có token xác thực"
+					},
+					"response": []
+				}
+			],
+			"description": "Test các trường hợp lỗi"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set order_id from previous create response if available",
+					"const orderId = pm.environment.get('order_id');",
+					"if (!orderId || orderId === '') {",
+					"    // Set default order ID for testing",
+					"    pm.environment.set('order_id', '1');",
+					"    console.log('Set default order_id: 1');",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-extract order_id from create order response",
+					"if (pm.response.code === 200) {",
+					"    const response = pm.response.json();",
+					"    if (response.success && response.data && response.data.id) {",
+					"        pm.environment.set('order_id', response.data.id);",
+					"        console.log('Auto-set order_id from response:', response.data.id);",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "order_id",
+			"value": "1",
+			"type": "string",
+			"description": "ID của đơn hàng để test"
+		},
+		{
+			"key": "user_token",
+			"value": "user_1",
+			"type": "string",
+			"description": "Token xác thực người dùng"
+		}
+	]
+}

@@ -18,12 +18,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+
 @Slf4j
 @Component
 @Order(2) // Run after logging filter
 public class EndpointAuthFilter extends OncePerRequestFilter {
 	private static final String[] PROTECTED_PATTERNS = new String[] {
-		"/orders/**"
+		"/api/admin/**",           // Admin APIs - cần authentication
+		"/api/seller/**",          // Seller APIs - cần authentication  
+		"/api/orders/**",          // Order APIs - cần authentication
+		"/api/users/**"            // User APIs - cần authentication
 	};
 	
 	private static final String REQUEST_ID_KEY = "requestId";
@@ -59,6 +65,26 @@ public class EndpointAuthFilter extends OncePerRequestFilter {
 					return;
 				}
 				
+				// Kiểm tra role cho admin APIs
+				if (path.startsWith("/api/admin/")) {
+					if (!isAdminToken(token)) {
+						log.warn("Access denied - Admin role required for path: {} - RequestId: {}", path, requestId);
+						response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+						response.getWriter().write("Access denied - Admin role required");
+						return;
+					}
+				}
+				
+				// Kiểm tra role cho seller APIs
+				if (path.startsWith("/api/seller/")) {
+					if (!isSellerOrAdminToken(token)) {
+						log.warn("Access denied - Seller or Admin role required for path: {} - RequestId: {}", path, requestId);
+						response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+						response.getWriter().write("Access denied - Seller or Admin role required");
+						return;
+					}
+				}
+				
 				log.info("Authentication successful for user: {} on path: {} - RequestId: {}", uid, path, requestId);
 				Authentication auth = new UidAuthenticationToken(uid);
 				SecurityContextHolder.getContext().setAuthentication(auth);
@@ -85,6 +111,34 @@ public class EndpointAuthFilter extends OncePerRequestFilter {
 			if (isMatch(p, path)) return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Kiểm tra token có phải của admin không
+	 */
+	private boolean isAdminToken(String token) {
+		try {
+			Jws<Claims> claims = jwtService.parse(token);
+			String role = claims.getBody().get("role", String.class);
+			return "ADMIN".equals(role);
+		} catch (Exception e) {
+			log.error("Error checking admin role from token", e);
+			return false;
+		}
+	}
+
+	/**
+	 * Kiểm tra token có phải của seller hoặc admin không
+	 */
+	private boolean isSellerOrAdminToken(String token) {
+		try {
+			Jws<Claims> claims = jwtService.parse(token);
+			String role = claims.getBody().get("role", String.class);
+			return "SELLER".equals(role) || "ADMIN".equals(role);
+		} catch (Exception e) {
+			log.error("Error checking seller/admin role from token", e);
+			return false;
+		}
 	}
 
 	static class UidAuthenticationToken extends AbstractAuthenticationToken {

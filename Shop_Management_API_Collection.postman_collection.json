@@ -1,0 +1,553 @@
+{
+	"info": {
+		"_postman_id": "shop-management-api-collection",
+		"name": "Shop Management API Collection",
+		"description": "Collection cho các API quản lý cửa hàng (Admin) - FoodShare App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Shop Management",
+			"item": [
+				{
+					"name": "Create Shop - Pizza Palace",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Pizza Palace New\",\n  \"address\": \"456 Đường XYZ, Quận 2, TP.HCM\",\n  \"phone\": \"0987654321\",\n  \"imageUrl\": \"https://example.com/pizza_palace_new.jpg\",\n  \"latitude\": 10.7769,\n  \"longitude\": 106.7009,\n  \"description\": \"Cửa hàng pizza mới với không gian rộng rãi\",\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops"
+							]
+						},
+						"description": "Tạo cửa hàng Pizza Palace mới"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Shop - Burger Joint",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Burger Joint\",\n  \"address\": \"789 Đường ABC, Quận 3, TP.HCM\",\n  \"phone\": \"0369852147\",\n  \"imageUrl\": \"https://example.com/burger_joint.jpg\",\n  \"latitude\": 10.7829,\n  \"longitude\": 106.6959,\n  \"description\": \"Cửa hàng burger với menu đa dạng\",\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops"
+							]
+						},
+						"description": "Tạo cửa hàng Burger Joint"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Shop - Inactive Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cafe Central Inactive\",\n  \"address\": \"321 Đường DEF, Quận 4, TP.HCM\",\n  \"phone\": \"0123456789\",\n  \"imageUrl\": \"https://example.com/cafe_central.jpg\",\n  \"latitude\": 10.7659,\n  \"longitude\": 106.7059,\n  \"description\": \"Cửa hàng cafe tạm ngưng hoạt động\",\n  \"status\": \"inactive\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops"
+							]
+						},
+						"description": "Tạo cửa hàng với trạng thái inactive"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shop by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/{{shop_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"{{shop_id}}"
+							]
+						},
+						"description": "Lấy thông tin cửa hàng theo ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Shop - Full Update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Pizza Palace Updated\",\n  \"address\": \"789 Đường ABC, Quận 3, TP.HCM\",\n  \"phone\": \"0123456789\",\n  \"imageUrl\": \"https://example.com/pizza_palace_updated.jpg\",\n  \"latitude\": 10.7829,\n  \"longitude\": 106.6959,\n  \"description\": \"Cửa hàng pizza đã được cập nhật với menu mới\",\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/{{shop_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"{{shop_id}}"
+							]
+						},
+						"description": "Cập nhật đầy đủ thông tin cửa hàng"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Shop - Partial Update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Pizza Palace Renamed\",\n  \"phone\": \"0987654321\",\n  \"status\": \"suspended\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/{{shop_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"{{shop_id}}"
+							]
+						},
+						"description": "Cập nhật một phần thông tin cửa hàng"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Shops",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops"
+							]
+						},
+						"description": "Lấy danh sách tất cả cửa hàng"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shops by Status - Active",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/status/active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"status",
+								"active"
+							]
+						},
+						"description": "Lấy danh sách cửa hàng có trạng thái active"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shops by Status - Inactive",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/status/inactive",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"status",
+								"inactive"
+							]
+						},
+						"description": "Lấy danh sách cửa hàng có trạng thái inactive"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shops by Status - Suspended",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/status/suspended",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"status",
+								"suspended"
+							]
+						},
+						"description": "Lấy danh sách cửa hàng có trạng thái suspended"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Shop",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/{{shop_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"{{shop_id}}"
+							]
+						},
+						"description": "Xóa cửa hàng theo ID"
+					},
+					"response": []
+				}
+			],
+			"description": "APIs quản lý cửa hàng"
+		},
+		{
+			"name": "Error Testing",
+			"item": [
+				{
+					"name": "Create Shop - Missing Required Fields",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"latitude\": 10.7769\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops"
+							]
+						},
+						"description": "Test lỗi khi thiếu các field bắt buộc"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Shop - Invalid Coordinates",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Invalid Coordinates Shop\",\n  \"address\": \"123 Test Street\",\n  \"latitude\": 200.0,\n  \"longitude\": 300.0,\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops"
+							]
+						},
+						"description": "Test lỗi khi tọa độ không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Shop - Invalid Phone",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Invalid Phone Shop\",\n  \"address\": \"123 Test Street\",\n  \"phone\": \"invalid-phone\",\n  \"latitude\": 10.7769,\n  \"longitude\": 106.7009,\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops"
+							]
+						},
+						"description": "Test lỗi khi số điện thoại không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Shop - Invalid Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Invalid Status Shop\",\n  \"address\": \"123 Test Street\",\n  \"latitude\": 10.7769,\n  \"longitude\": 106.7009,\n  \"status\": \"invalid_status\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops"
+							]
+						},
+						"description": "Test lỗi khi trạng thái không hợp lệ"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Shop - Non-existent ID",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Non-existent Shop\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"999"
+							]
+						},
+						"description": "Test lỗi khi cập nhật cửa hàng không tồn tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shop - Non-existent ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"999"
+							]
+						},
+						"description": "Test lỗi khi lấy thông tin cửa hàng không tồn tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Shop - Non-existent ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"999"
+							]
+						},
+						"description": "Test lỗi khi xóa cửa hàng không tồn tại"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shops by Status - Invalid Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/shops/status/invalid",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"shops",
+								"status",
+								"invalid"
+							]
+						},
+						"description": "Test lỗi khi trạng thái không hợp lệ"
+					},
+					"response": []
+				}
+			],
+			"description": "Test các trường hợp lỗi"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set shop_id from previous create response if available",
+					"const shopId = pm.environment.get('shop_id');",
+					"if (!shopId || shopId === '') {",
+					"    // Set default shop ID for testing",
+					"    pm.environment.set('shop_id', '1');",
+					"    console.log('Set default shop_id: 1');",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-extract shop_id from create shop response",
+					"if (pm.response.code === 200) {",
+					"    const response = pm.response.json();",
+					"    if (response.success && response.data && response.data.id) {",
+					"        pm.environment.set('shop_id', response.data.id);",
+					"        console.log('Auto-set shop_id from response:', response.data.id);",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "shop_id",
+			"value": "1",
+			"type": "string",
+			"description": "ID của cửa hàng để test"
+		}
+	]
+}

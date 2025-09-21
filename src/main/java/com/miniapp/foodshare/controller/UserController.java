@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -44,7 +43,7 @@ public class UserController {
         @ApiResponse(responseCode = "409", description = "Email đã tồn tại"),
         @ApiResponse(responseCode = "500", description = "Lỗi server")
     })
-    public ResponseEntity<Result<UserInfoResponse>> updateUser(
+    public Result<UserInfoResponse> updateUser(
             @Parameter(description = "ID của người dùng", example = "1", required = true)
             @PathVariable Integer userId,
             @Parameter(description = "Thông tin cập nhật", required = true)
@@ -57,12 +56,11 @@ public class UserController {
         
         if (result.isSuccess()) {
             log.info("User updated successfully: userId={}", userId);
-            return ResponseEntity.ok(result);
         } else {
             log.warn("User update failed: userId={}, code={}, message={}", 
                     userId, result.getCode(), result.getMessage());
-            return ResponseEntity.status(getHttpStatus(result.getCode())).body(result);
         }
+        return result;
     }
     
     /**
@@ -81,7 +79,7 @@ public class UserController {
         @ApiResponse(responseCode = "404", description = "Không tìm thấy người dùng"),
         @ApiResponse(responseCode = "500", description = "Lỗi server")
     })
-    public ResponseEntity<Result<UserInfoResponse>> getUserInfo(
+    public Result<UserInfoResponse> getUserInfo(
             @Parameter(description = "ID của người dùng", example = "1", required = true)
             @PathVariable Integer userId
     ) {
@@ -91,23 +89,11 @@ public class UserController {
         
         if (result.isSuccess()) {
             log.info("User info retrieved successfully: userId={}", userId);
-            return ResponseEntity.ok(result);
         } else {
             log.warn("Get user info failed: userId={}, code={}, message={}", 
                     userId, result.getCode(), result.getMessage());
-            return ResponseEntity.status(getHttpStatus(result.getCode())).body(result);
         }
+        return result;
     }
     
-    /**
-     * Chuyển đổi error code thành HTTP status
-     */
-    private int getHttpStatus(String errorCode) {
-        return switch (errorCode) {
-            case "USER_NOT_FOUND" -> 404;
-            case "EMAIL_ALREADY_EXISTS" -> 409;
-            case "INVALID_REQUEST" -> 400;
-            default -> 500;
-        };
-    }
 }

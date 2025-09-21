@@ -1,0 +1,265 @@
+{
+  "info": {
+    "name": "BackOffice Authentication API Collection",
+    "description": "Collection APIs đăng ký và đăng nhập cho Admin và Seller",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@foodshare.com\",\n  \"password\": \"Admin123456\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "register"]
+            },
+            "description": "Đăng ký tài khoản Admin mới"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Seller",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Seller User\",\n  \"email\": \"seller@foodshare.com\",\n  \"password\": \"Seller123456\",\n  \"role\": \"SELLER\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "register"]
+            },
+            "description": "Đăng ký tài khoản Seller mới"
+          },
+          "response": []
+        },
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@foodshare.com\",\n  \"password\": \"Admin123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "login"]
+            },
+            "description": "Đăng nhập bằng email và mật khẩu (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Login Seller",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"seller@foodshare.com\",\n  \"password\": \"Seller123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "login"]
+            },
+            "description": "Đăng nhập bằng email và mật khẩu (Seller)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "me"]
+            },
+            "description": "Lấy thông tin của user đang đăng nhập"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "logout"]
+            },
+            "description": "Đăng xuất khỏi hệ thống"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Testing",
+      "item": [
+        {
+          "name": "Login Wrong Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@foodshare.com\",\n  \"password\": \"WrongPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "login"]
+            },
+            "description": "Test đăng nhập sai mật khẩu"
+          },
+          "response": []
+        },
+        {
+          "name": "Login Wrong Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nonexistent@foodshare.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "login"]
+            },
+            "description": "Test đăng nhập email không tồn tại"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Duplicate Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Another Admin\",\n  \"email\": \"admin@foodshare.com\",\n  \"password\": \"Admin123456\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "register"]
+            },
+            "description": "Test đăng ký email trùng lặp"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Validation Error",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"email\": \"invalid-email\",\n  \"password\": \"123\",\n  \"role\": \"INVALID_ROLE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "register"]
+            },
+            "description": "Test validation errors"
+          },
+          "response": []
+        },
+        {
+          "name": "Unauthorized Access",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/backoffice/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "backoffice", "me"]
+            },
+            "description": "Test truy cập không có token"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    }
+  ]
+}

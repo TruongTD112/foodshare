@@ -2,6 +2,8 @@ package com.miniapp.foodshare.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import com.miniapp.foodshare.common.UserRole;
 
 @Entity
 @Table(
@@ -50,6 +53,10 @@ public class CustomerUser {
 
 	@Column(name = "phone_number", length = 20)
 	private String phoneNumber;
+
+	@Column(name = "role", nullable = false, length = 20)
+	@Enumerated(EnumType.STRING)
+	private UserRole role;
 
 	@Column(name = "created_at", insertable = false, updatable = false)
 	private LocalDateTime createdAt;

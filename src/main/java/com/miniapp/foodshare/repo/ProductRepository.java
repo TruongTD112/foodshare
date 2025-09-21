@@ -15,6 +15,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	Page<Product> findByStatus(String status, Pageable pageable);
 	Page<Product> findByNameContainingIgnoreCaseAndStatus(String name, String status, Pageable pageable);
 	List<Product> findByShopId(Integer shopId);
+	Page<Product> findByShopId(Integer shopId, Pageable pageable);
+	List<Product> findByShopIdAndStatus(Integer shopId, String status);
 	
 	/**
 	 * Tìm kiếm sản phẩm có giảm giá theo mức giảm giá giảm dần

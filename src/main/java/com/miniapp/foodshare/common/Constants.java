@@ -26,8 +26,6 @@ public final class Constants {
     public static final class OrderStatus {
         public static final String PENDING = "1";
         public static final String CONFIRMED = "2";
-        public static final String PREPARING = "preparing";
-        public static final String READY = "ready";
         public static final String COMPLETED = "4";
         public static final String CANCELLED = "3";
         

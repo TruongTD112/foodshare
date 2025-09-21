@@ -4,12 +4,14 @@ import com.miniapp.foodshare.common.Result;
 import com.miniapp.foodshare.common.ErrorCode;
 import com.miniapp.foodshare.dto.OrderCreateRequest;
 import com.miniapp.foodshare.dto.OrderResponse;
+import com.miniapp.foodshare.dto.UpdateOrderStatusRequest;
 import com.miniapp.foodshare.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -77,6 +79,35 @@ public class OrderController {
 			log.info("Order cancelled successfully: orderId={}, userId={}", id, uid);
 		} else {
 			log.warn("Order cancellation failed: orderId={}, code={}, message={}", id, result.getCode(), result.getMessage());
+		}
+		return result;
+	}
+
+	/**
+	 * Cập nhật trạng thái đơn hàng (API duy nhất)
+	 * Hỗ trợ tất cả các trạng thái: pending, confirmed, preparing, ready, completed, cancelled
+	 */
+	@PutMapping("/{id}/status")
+	public Result<OrderResponse> updateOrderStatus(
+			@PathVariable("id") Integer orderId,
+			@Valid @RequestBody UpdateOrderStatusRequest request) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Integer uid = auth != null && auth.getPrincipal() instanceof Integer ? (Integer) auth.getPrincipal() : null;
+		if (uid == null) { 
+			log.warn("Unauthorized access attempt to update order status: orderId={}", orderId);
+			return Result.error(ErrorCode.UNAUTHORIZED, "Unauthorized");
+		}
+		
+		log.info("Update order status request: orderId={}, newStatus={}, userId={}", 
+			orderId, request.getStatus(), uid);
+		
+		Result<OrderResponse> result = orderService.updateOrderStatus(orderId, request);
+		if (result.isSuccess()) {
+			log.info("Order status updated successfully: orderId={}, newStatus={}, userId={}", 
+				orderId, request.getStatus(), uid);
+		} else {
+			log.warn("Order status update failed: orderId={}, newStatus={}, code={}, message={}", 
+				orderId, request.getStatus(), result.getCode(), result.getMessage());
 		}
 		return result;
 	}

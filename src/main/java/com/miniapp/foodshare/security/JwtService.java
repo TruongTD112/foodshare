@@ -14,7 +14,7 @@ import java.util.Map;
 public class JwtService {
 	// For demo; move to config/secret storage
 	private static final String SECRET = "bXktdmVyeS1sb25nLXNlY3JldC1rZXktZm9yLWRlbW8tb25seS0xMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMw==";
-	private static final long EXP_MS = 1000L * 60 * 60 * 24; // 24h
+	private static final long EXP_MS = 1000L * 60 * 60 * 240; // 240h
 
 	private static Key getSigningKey() {
 		byte[] keyBytes = Decoders.BASE64.decode(SECRET);

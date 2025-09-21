@@ -1,0 +1,213 @@
+{
+  "info": {
+    "name": "Seller Management API Collection",
+    "description": "Collection APIs dành cho Seller - chỉ quản lý sản phẩm và cửa hàng của mình",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Shop Management",
+      "item": [
+        {
+          "name": "Create Shop",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pizza House - Seller Shop\",\n  \"address\": \"123 Đường ABC, Quận 1, TP.HCM\",\n  \"phone\": \"0901234567\",\n  \"imageUrl\": \"https://example.com/pizza_house.jpg\",\n  \"latitude\": 10.762622,\n  \"longitude\": 106.660172,\n  \"description\": \"Cửa hàng pizza ngon nhất thành phố\",\n  \"rating\": 4.5,\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/seller/shops",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seller", "shops"]
+            },
+            "description": "Seller tạo cửa hàng mới cho mình"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Shops",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seller/shops",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seller", "shops"]
+            },
+            "description": "Seller xem danh sách cửa hàng của mình"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Shop by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seller/shops/{{shop_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seller", "shops", "{{shop_id}}"]
+            },
+            "description": "Seller xem thông tin cửa hàng của mình"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Shop",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pizza House Updated - Seller Shop\",\n  \"description\": \"Cửa hàng pizza ngon nhất thành phố - đã cập nhật\",\n  \"rating\": 4.8\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/seller/shops/{{shop_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seller", "shops", "{{shop_id}}"]
+            },
+            "description": "Seller cập nhật thông tin cửa hàng của mình"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Product Management",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopId\": {{shop_id}},\n  \"name\": \"Pizza Margherita - Seller Product\",\n  \"description\": \"Pizza cổ điển từ seller\",\n  \"price\": 150000.00,\n  \"originalPrice\": 180000.00,\n  \"imageUrl\": \"https://example.com/pizza_margherita.jpg\",\n  \"detailImageUrl\": \"https://example.com/pizza_margherita_detail.jpg\",\n  \"quantityAvailable\": 50,\n  \"status\": \"available\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/seller/products",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seller", "products"]
+            },
+            "description": "Seller tạo sản phẩm mới cho shop của mình"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seller/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seller", "products", "{{product_id}}"]
+            },
+            "description": "Seller xem thông tin sản phẩm của mình"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pizza Margherita Updated - Seller Product\",\n  \"description\": \"Pizza cổ điển từ seller - đã cập nhật\",\n  \"price\": 160000.00,\n  \"quantityAvailable\": 45\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/seller/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seller", "products", "{{product_id}}"]
+            },
+            "description": "Seller cập nhật thông tin sản phẩm của mình"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seller/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seller", "products", "{{product_id}}"]
+            },
+            "description": "Seller xóa sản phẩm của mình"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Products by Shop",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seller/shops/{{shop_id}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seller", "shops", "{{shop_id}}", "products"]
+            },
+            "description": "Seller xem danh sách sản phẩm của shop của mình"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Products by Shop and Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/seller/shops/{{shop_id}}/products/status/{{status}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seller", "shops", "{{shop_id}}", "products", "status", "{{status}}"]
+            },
+            "description": "Seller xem danh sách sản phẩm của shop theo trạng thái"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "shop_id",
+      "value": "1"
+    },
+    {
+      "key": "product_id",
+      "value": "1"
+    },
+    {
+      "key": "status",
+      "value": "available"
+    }
+  ]
+}

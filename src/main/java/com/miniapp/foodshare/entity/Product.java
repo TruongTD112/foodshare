@@ -30,7 +30,7 @@ public class Product {
 	@Column(name = "shop_id", nullable = false)
 	private Integer shopId;
 
-	@Column(name = "category_id", nullable = false)
+	@Column(name = "category_id")
 	private Integer categoryId;
 
 	@Column(nullable = false, length = 255)
