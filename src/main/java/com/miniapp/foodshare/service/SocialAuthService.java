@@ -22,6 +22,7 @@ import java.util.Optional;
 public class SocialAuthService {
 	private final CustomerUserRepository customerUserRepository;
 	private final JwtService jwtService;
+	private final GoogleTokenVerificationService googleTokenVerificationService;
 
 	@Transactional
 	public Result<SocialLoginResponse> login(SocialLoginRequest request) {
@@ -31,13 +32,45 @@ public class SocialAuthService {
 			return Result.error(ErrorCode.INVALID_REQUEST, "Invalid request");
 		}
 		String provider = request.getProvider().trim().toLowerCase();
+		String token = request.getToken().trim();
 
-		// TODO: Replace with real verification against Google/Facebook SDKs
-		// For now, treat token as providerId and demo email/name derivation
-		String providerId = request.getToken().trim();
-		String email = provider + "+" + providerId + "@example.com";
-		String name = provider.substring(0, 1).toUpperCase() + provider.substring(1) + " User";
-		String avatar = null;
+		// Verify token based on provider
+		GoogleTokenVerificationService.GoogleUserInfo googleUserInfo = null;
+		String providerId;
+		String email;
+		String name;
+		String avatar;
+
+		if ("google".equals(provider)) {
+			// Verify Google ID token
+			googleUserInfo = googleTokenVerificationService.verifyAndGetUserInfo(token);
+			if (googleUserInfo == null) {
+				log.warn("Google token verification failed for token: {}", token);
+				return Result.error(ErrorCode.AUTHENTICATION_FAILED, "Google token verification failed");
+			}
+			
+			// Extract user info from Google
+			providerId = googleUserInfo.getSub();
+			email = googleUserInfo.getEmail();
+			name = googleUserInfo.getName();
+			avatar = googleUserInfo.getPicture();
+			
+			// Verify email is verified
+			if (googleUserInfo.getEmailVerified() == null || !googleUserInfo.getEmailVerified()) {
+				log.warn("Google email not verified for user: {}", email);
+				return Result.error(ErrorCode.AUTHENTICATION_FAILED, "Google email not verified");
+			}
+			
+			log.info("Google token verified successfully for user: {}", email);
+		} else {
+			// Fallback for other providers (Facebook, etc.)
+			// TODO: Add Facebook verification when needed
+			log.warn("Provider {} not supported for token verification, using fallback", provider);
+			providerId = token;
+			email = provider + "+" + providerId + "@example.com";
+			name = provider.substring(0, 1).toUpperCase() + provider.substring(1) + " User";
+			avatar = null;
+		}
 
 		Optional<CustomerUser> existing = customerUserRepository.findByProviderId(providerId);
 		CustomerUser user = existing.orElseGet(() -> CustomerUser.builder()

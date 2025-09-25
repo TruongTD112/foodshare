@@ -63,4 +63,20 @@ public class SecurityConfig {
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
+
+
+	public static void generatePassword(String rawPassword) {
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+		String encodedPassword = encoder.encode(rawPassword);
+
+		System.out.println("=== BCrypt Password Generation ===");
+		System.out.println("Raw Password: " + rawPassword);
+		System.out.println("Encoded Password: " + encodedPassword);
+		System.out.println("================================");
+	}
+
+	public static void main(String[] args) {
+		generatePassword("Truong1112@@");
+	}
+
 }

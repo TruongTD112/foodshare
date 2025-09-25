@@ -57,7 +57,7 @@ public enum ErrorCode {
     INVALID_FILE_TYPE("400", "Invalid file type"),
     FILE_UPLOAD_FAILED("500", "File upload failed"),
     FILE_DELETE_FAILED("500", "File deletion failed"),
-    IMAGE_NOT_FOUND("404", "Image not found");
+    IMAGE_NOT_FOUND("404", "Image not found"), AUTHENTICATION_FAILED("401", "not authen" );
 
     private final String code;
     private final String message;
