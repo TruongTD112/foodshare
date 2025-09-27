@@ -29,6 +29,7 @@ public class EndpointAuthFilter extends OncePerRequestFilter {
 		"/api/admin/**",           // Admin APIs - cần authentication
 		"/api/seller/**",          // Seller APIs - cần authentication  
 		"/api/orders/**",          // Order APIs - cần authentication
+		"/orders/**",          // Order APIs - cần authentication
 		"/api/users/**"            // User APIs - cần authentication
 	};
 	
