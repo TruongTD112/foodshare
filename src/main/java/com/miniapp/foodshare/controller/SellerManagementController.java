@@ -72,7 +72,7 @@ public class SellerManagementController {
         }
 
         log.info("Seller create shop request: sellerId={}, name={}", sellerId, request.getName());
-        return shopManagementService.createShop(request);
+        return shopManagementService.createShop(request, sellerId);
     }
 
     /**
@@ -108,6 +108,30 @@ public class SellerManagementController {
 
         log.info("Seller update shop request: sellerId={}, shopId={}", sellerId, shopId);
         return shopManagementService.updateShop(shopId, request);
+    }
+
+    /**
+     * Lấy danh sách cửa hàng của seller
+     */
+    @GetMapping("/shops")
+    @Operation(
+            summary = "Lấy danh sách cửa hàng của seller",
+            description = "Seller xem danh sách tất cả cửa hàng mà mình có quyền quản lý"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lấy danh sách thành công",
+                    content = @Content(schema = @Schema(implementation = ShopManagementResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Chưa xác thực"),
+            @ApiResponse(responseCode = "500", description = "Lỗi server")
+    })
+    public Result<List<ShopManagementResponse>> getMyShops() {
+        Integer sellerId = getCurrentSellerId();
+        if (sellerId == null) {
+            return Result.error(INVALID_CREDENTIALS, "Unauthorized");
+        }
+
+        log.info("Seller get my shops request: sellerId={}", sellerId);
+        return shopManagementService.getShopsBySellerId(sellerId);
     }
 
     /**

@@ -43,14 +43,41 @@ echo "$CREATE_SHOP" | jq '.'
 
 SHOP_ID=$(echo "$CREATE_SHOP" | jq -r '.data.id // empty')
 echo "Created Shop ID: $SHOP_ID"
+
+# Kiểm tra Shop_Member được tạo bằng cách gọi API lấy danh sách cửa hàng
+echo ""
+echo -e "${BLUE}Kiểm tra Shop_Member được tạo (thông qua API lấy danh sách cửa hàng):${NC}"
+GET_MY_SHOPS_CHECK=$(curl -s -X GET "${BASE_URL}/api/seller/shops")
+SHOP_IN_LIST=$(echo "$GET_MY_SHOPS_CHECK" | jq -r --arg shopId "$SHOP_ID" '.data[] | select(.id == ($shopId | tonumber)) | .id // empty')
+
+if [ -n "$SHOP_IN_LIST" ]; then
+    echo -e "${GREEN}✅ Shop_Member đã được tạo - Cửa hàng có trong danh sách của seller${NC}"
+else
+    echo -e "${RED}❌ Shop_Member có thể chưa được tạo - Cửa hàng không có trong danh sách${NC}"
+fi
+
 echo ""
 echo "----------------------------------------"
 echo ""
 
 # =====================================================
-# 2. LẤY THÔNG TIN CỬA HÀNG
+# 2. LẤY DANH SÁCH CỬA HÀNG CỦA SELLER
 # =====================================================
-echo -e "${YELLOW}2. Lấy thông tin cửa hàng${NC}"
+echo -e "${YELLOW}2. Lấy danh sách cửa hàng của seller${NC}"
+echo ""
+
+GET_MY_SHOPS=$(curl -s -X GET "${BASE_URL}/api/seller/shops")
+echo "Get My Shops Response:"
+echo "$GET_MY_SHOPS" | jq '.'
+
+echo ""
+echo "----------------------------------------"
+echo ""
+
+# =====================================================
+# 3. LẤY THÔNG TIN CỬA HÀNG
+# =====================================================
+echo -e "${YELLOW}3. Lấy thông tin cửa hàng${NC}"
 echo ""
 
 if [ -n "$SHOP_ID" ] && [ "$SHOP_ID" != "null" ]; then
@@ -66,9 +93,9 @@ echo "----------------------------------------"
 echo ""
 
 # =====================================================
-# 3. CẬP NHẬT CỬA HÀNG
+# 4. CẬP NHẬT CỬA HÀNG
 # =====================================================
-echo -e "${YELLOW}3. Cập nhật cửa hàng${NC}"
+echo -e "${YELLOW}4. Cập nhật cửa hàng${NC}"
 echo ""
 
 if [ -n "$SHOP_ID" ] && [ "$SHOP_ID" != "null" ]; then
@@ -91,9 +118,9 @@ echo "----------------------------------------"
 echo ""
 
 # =====================================================
-# 4. TẠO SẢN PHẨM CHO CỬA HÀNG
+# 5. TẠO SẢN PHẨM CHO CỬA HÀNG
 # =====================================================
-echo -e "${YELLOW}4. Tạo sản phẩm cho cửa hàng${NC}"
+echo -e "${YELLOW}5. Tạo sản phẩm cho cửa hàng${NC}"
 echo ""
 
 if [ -n "$SHOP_ID" ] && [ "$SHOP_ID" != "null" ]; then
@@ -125,9 +152,9 @@ echo "----------------------------------------"
 echo ""
 
 # =====================================================
-# 5. LẤY DANH SÁCH SẢN PHẨM CỦA SHOP
+# 6. LẤY DANH SÁCH SẢN PHẨM CỦA SHOP
 # =====================================================
-echo -e "${YELLOW}5. Lấy danh sách sản phẩm của shop${NC}"
+echo -e "${YELLOW}6. Lấy danh sách sản phẩm của shop${NC}"
 echo ""
 
 if [ -n "$SHOP_ID" ] && [ "$SHOP_ID" != "null" ]; then
@@ -143,9 +170,9 @@ echo "----------------------------------------"
 echo ""
 
 # =====================================================
-# 6. LẤY SẢN PHẨM THEO TRẠNG THÁI
+# 7. LẤY SẢN PHẨM THEO TRẠNG THÁI
 # =====================================================
-echo -e "${YELLOW}6. Lấy sản phẩm theo trạng thái (available)${NC}"
+echo -e "${YELLOW}7. Lấy sản phẩm theo trạng thái (available)${NC}"
 echo ""
 
 if [ -n "$SHOP_ID" ] && [ "$SHOP_ID" != "null" ]; then
@@ -161,9 +188,9 @@ echo "----------------------------------------"
 echo ""
 
 # =====================================================
-# 7. CẬP NHẬT SẢN PHẨM
+# 8. CẬP NHẬT SẢN PHẨM
 # =====================================================
-echo -e "${YELLOW}7. Cập nhật sản phẩm${NC}"
+echo -e "${YELLOW}8. Cập nhật sản phẩm${NC}"
 echo ""
 
 if [ -n "$PRODUCT_ID" ] && [ "$PRODUCT_ID" != "null" ]; then
@@ -187,9 +214,9 @@ echo "----------------------------------------"
 echo ""
 
 # =====================================================
-# 8. LẤY THÔNG TIN SẢN PHẨM
+# 9. LẤY THÔNG TIN SẢN PHẨM
 # =====================================================
-echo -e "${YELLOW}8. Lấy thông tin sản phẩm${NC}"
+echo -e "${YELLOW}9. Lấy thông tin sản phẩm${NC}"
 echo ""
 
 if [ -n "$PRODUCT_ID" ] && [ "$PRODUCT_ID" != "null" ]; then
@@ -205,9 +232,9 @@ echo "----------------------------------------"
 echo ""
 
 # =====================================================
-# 9. TEST UNAUTHORIZED ACCESS
+# 10. TEST UNAUTHORIZED ACCESS
 # =====================================================
-echo -e "${YELLOW}9. Test unauthorized access (không có token)${NC}"
+echo -e "${YELLOW}10. Test unauthorized access (không có token)${NC}"
 echo ""
 
 UNAUTHORIZED_TEST=$(curl -s -X GET "${BASE_URL}/api/seller/shops" \
@@ -220,9 +247,9 @@ echo "----------------------------------------"
 echo ""
 
 # =====================================================
-# 10. TEST ACCESS ADMIN APIs (SHOULD FAIL)
+# 11. TEST ACCESS ADMIN APIs (SHOULD FAIL)
 # =====================================================
-echo -e "${YELLOW}10. Test access Admin APIs (should fail)${NC}"
+echo -e "${YELLOW}11. Test access Admin APIs (should fail)${NC}"
 echo ""
 
 ADMIN_TEST=$(curl -s -X GET "${BASE_URL}/api/admin/shops" \
@@ -238,15 +265,16 @@ echo -e "${GREEN}=== KẾT QUẢ TEST SELLER APIs ===${NC}"
 echo ""
 echo -e "${GREEN}✅ Các APIs đã test:${NC}"
 echo "1. ✅ POST /api/seller/shops - Tạo cửa hàng"
-echo "2. ✅ GET /api/seller/shops/{shopId} - Lấy thông tin cửa hàng"
-echo "3. ✅ PUT /api/seller/shops/{shopId} - Cập nhật cửa hàng"
-echo "4. ✅ POST /api/seller/products - Tạo sản phẩm"
-echo "5. ✅ GET /api/seller/shops/{shopId}/products - Lấy sản phẩm theo shop"
-echo "6. ✅ GET /api/seller/shops/{shopId}/products/status/{status} - Lấy sản phẩm theo trạng thái"
-echo "7. ✅ PUT /api/seller/products/{productId} - Cập nhật sản phẩm"
-echo "8. ✅ GET /api/seller/products/{productId} - Lấy thông tin sản phẩm"
-echo "9. ✅ Test unauthorized access"
-echo "10. ✅ Test access Admin APIs (should fail)"
+echo "2. ✅ GET /api/seller/shops - Lấy danh sách cửa hàng của seller"
+echo "3. ✅ GET /api/seller/shops/{shopId} - Lấy thông tin cửa hàng"
+echo "4. ✅ PUT /api/seller/shops/{shopId} - Cập nhật cửa hàng"
+echo "5. ✅ POST /api/seller/products - Tạo sản phẩm"
+echo "6. ✅ GET /api/seller/shops/{shopId}/products - Lấy sản phẩm theo shop"
+echo "7. ✅ GET /api/seller/shops/{shopId}/products/status/{status} - Lấy sản phẩm theo trạng thái"
+echo "8. ✅ PUT /api/seller/products/{productId} - Cập nhật sản phẩm"
+echo "9. ✅ GET /api/seller/products/{productId} - Lấy thông tin sản phẩm"
+echo "10. ✅ Test unauthorized access"
+echo "11. ✅ Test access Admin APIs (should fail)"
 echo ""
 echo -e "${BLUE}Phân quyền:${NC}"
 echo "✅ Seller chỉ có thể quản lý sản phẩm và cửa hàng của mình"
