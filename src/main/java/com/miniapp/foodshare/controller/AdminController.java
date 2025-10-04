@@ -6,6 +6,7 @@ import com.miniapp.foodshare.dto.*;
 import com.miniapp.foodshare.service.AdminProductService;
 import com.miniapp.foodshare.service.AdminShopService;
 import com.miniapp.foodshare.service.BackOfficeAuthService;
+import com.miniapp.foodshare.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,6 +34,7 @@ public class AdminController {
     private final BackOfficeAuthService backOfficeAuthService;
     private final AdminShopService adminShopService;
     private final AdminProductService adminProductService;
+    private final OrderService orderService;
 
     // ==================== ADMIN MANAGEMENT ====================
 
@@ -453,6 +455,49 @@ public class AdminController {
         } else {
             log.warn("Delete product failed: adminId={}, productId={}, code={}, message={}",
                     adminId, productId, result.getCode(), result.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Lấy danh sách đơn hàng cho admin
+     * Có thể lấy tất cả đơn hàng hoặc filter theo shopId
+     */
+    @GetMapping("/orders")
+    @Operation(
+            summary = "Lấy danh sách đơn hàng",
+            description = "Admin xem danh sách đơn hàng trong hệ thống. Có thể lấy tất cả hoặc filter theo shopId"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lấy danh sách thành công",
+                    content = @Content(schema = @Schema(implementation = ShopOrderResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Chưa đăng nhập"),
+            @ApiResponse(responseCode = "403", description = "Chỉ admin mới có quyền truy cập"),
+            @ApiResponse(responseCode = "500", description = "Lỗi server")
+    })
+    public Result<PagedResult<ShopOrderResponse>> getOrders(
+            @Parameter(description = "Tham số lọc đơn hàng")
+            @Valid ShopOrderListRequest request
+    ) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Integer adminId = auth != null && auth.getPrincipal() instanceof Integer ? (Integer) auth.getPrincipal() : null;
+
+        if (adminId == null) {
+            log.warn("Unauthorized access to get orders");
+            return Result.error(ErrorCode.UNAUTHORIZED, "Chưa đăng nhập");
+        }
+
+        log.info("Get orders request: adminId={}, shopId={}, status={}, searchKeyword={}",
+                adminId, request.getShopId(), request.getStatus(), request.getSearchKeyword());
+
+        Result<PagedResult<ShopOrderResponse>> result = orderService.getAllOrdersForAdmin(request);
+
+        if (result.isSuccess()) {
+            log.info("Orders retrieved successfully: adminId={}, totalElements={}",
+                    adminId, result.getData().getTotalElements());
+        } else {
+            log.warn("Get orders failed: adminId={}, code={}, message={}",
+                    adminId, result.getCode(), result.getMessage());
         }
         return result;
     }

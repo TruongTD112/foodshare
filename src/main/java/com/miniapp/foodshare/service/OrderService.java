@@ -5,22 +5,36 @@ import com.miniapp.foodshare.common.ErrorCode;
 import com.miniapp.foodshare.common.Constants;
 import com.miniapp.foodshare.dto.OrderCreateRequest;
 import com.miniapp.foodshare.dto.OrderResponse;
+import com.miniapp.foodshare.dto.PagedResult;
+import com.miniapp.foodshare.dto.ShopOrderListRequest;
+import com.miniapp.foodshare.dto.ShopOrderResponse;
 import com.miniapp.foodshare.dto.UpdateOrderStatusRequest;
+import com.miniapp.foodshare.entity.CustomerUser;
 import com.miniapp.foodshare.entity.Order;
 import com.miniapp.foodshare.entity.Product;
 import com.miniapp.foodshare.entity.Shop;
+import com.miniapp.foodshare.entity.ShopMember;
+import com.miniapp.foodshare.repo.CustomerUserRepository;
 import com.miniapp.foodshare.repo.OrderRepository;
 import com.miniapp.foodshare.repo.ProductRepository;
 import com.miniapp.foodshare.repo.ProductSalesStatsRepository;
+import com.miniapp.foodshare.repo.ShopMemberRepository;
 import com.miniapp.foodshare.repo.ShopRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,6 +45,8 @@ public class OrderService {
 	private final ProductRepository productRepository;
 	private final ProductSalesStatsRepository productSalesStatsRepository;
 	private final ShopRepository shopRepository;
+	private final CustomerUserRepository customerUserRepository;
+	private final ShopMemberRepository shopMemberRepository;
 	
 	@Transactional
 	public Result<OrderResponse> createOrder(OrderCreateRequest req) {
@@ -364,6 +380,344 @@ public class OrderService {
 				product.setQuantityPending(currentPending - order.getQuantity());
 				productRepository.save(product);
 			}
+		}
+	}
+
+	/**
+	 * Lấy danh sách đơn hàng theo shop
+	 */
+	@Transactional(readOnly = true)
+	public Result<PagedResult<ShopOrderResponse>> getOrdersByShop(Integer sellerUserId, ShopOrderListRequest request) {
+		try {
+			// Kiểm tra shopId có được cung cấp không
+			if (request.getShopId() == null) {
+				log.warn("ShopId is required: sellerUserId={}", sellerUserId);
+				return Result.error(ErrorCode.INVALID_REQUEST, "ShopId is required");
+			}
+			
+			// Kiểm tra seller có phải là thành viên của shop không
+			ShopMember shopMember = shopMemberRepository.findByBackofficeUserIdAndShopId(sellerUserId, request.getShopId())
+				.stream().findFirst().orElse(null);
+			if (shopMember == null) {
+				log.warn("Seller is not a member of shop: sellerUserId={}, shopId={}", sellerUserId, request.getShopId());
+				return Result.error(ErrorCode.FORBIDDEN, "You don't have permission to access this shop's orders");
+			}
+			
+			// Validate pagination parameters
+			int page = request.getPage() != null ? request.getPage() : 0;
+			int size = request.getSize() != null ? request.getSize() : 20;
+			
+			if (page < 0) {
+				log.warn("Invalid page number: page={}", page);
+				return Result.error(ErrorCode.INVALID_PAGE_NUMBER, "Page number must be >= 0");
+			}
+			
+			// Tạo Pageable với sorting
+			String sortBy = request.getSortBy() != null ? request.getSortBy() : "createdAt";
+			String sortDirection = request.getSortDirection() != null ? request.getSortDirection() : "desc";
+			Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+			Pageable pageable = PageRequest.of(page, size, sort);
+			
+			// Lấy danh sách Order với filter theo ngày và status
+			Page<Order> orders = orderRepository.findOrdersWithFilters(
+				request.getShopId(), 
+				request.getStatus(),
+				request.getFromDate(), 
+				request.getToDate(), 
+				pageable
+			);
+			
+			// Batch load tất cả thông tin cần thiết
+			List<Order> orderList = orders.getContent();
+			Map<Integer, CustomerUser> userMap = batchLoadUsers(orderList);
+			Map<Integer, Product> productMap = batchLoadProducts(orderList);
+			Map<Integer, Shop> shopMap = batchLoadShops(orderList);
+			
+			// Map sang ShopOrderResponse với thông tin đã load
+			List<ShopOrderResponse> orderResponses = orderList.stream()
+				.map(order -> mapToShopOrderResponseWithMaps(order, userMap, productMap, shopMap))
+				.collect(Collectors.toList());
+			
+			// Tạo PagedResult
+			long totalElements = orders.getTotalElements();
+			int totalPages = orders.getTotalPages();
+			
+			PagedResult<ShopOrderResponse> result = PagedResult.<ShopOrderResponse>builder()
+				.content(orderResponses)
+				.page(page)
+				.size(size)
+				.totalElements(totalElements)
+				.totalPages(totalPages)
+				.hasNext(page < totalPages - 1)
+				.hasPrevious(page > 0)
+				.build();
+			
+			log.info("Shop orders retrieved successfully: shopId={}, sellerUserId={}, count={}", 
+				request.getShopId(), sellerUserId, totalElements);
+			return Result.success(result);
+			
+		} catch (Exception e) {
+			log.error("Error getting shop orders: sellerUserId={}, shopId={}", sellerUserId, request.getShopId(), e);
+			return Result.error(ErrorCode.INTERNAL_ERROR, "Failed to get shop orders");
+		}
+	}
+
+	/**
+	 * Cập nhật trạng thái đơn hàng cho seller
+	 */
+	@Transactional
+	public Result<ShopOrderResponse> updateOrderStatusForSeller(Integer orderId, UpdateOrderStatusRequest request, Integer sellerUserId) {
+		try {
+			// Validate order exists
+			Order order = orderRepository.findById(orderId).orElse(null);
+			if (order == null) {
+				log.warn("Order not found: orderId={}", orderId);
+				return Result.error(ErrorCode.ORDER_NOT_FOUND, "Order not found");
+			}
+
+			// Kiểm tra seller có phải là thành viên của shop không
+			ShopMember shopMember = shopMemberRepository.findByBackofficeUserIdAndShopId(sellerUserId, order.getShopId())
+				.stream().findFirst().orElse(null);
+			if (shopMember == null) {
+				log.warn("Seller is not a member of shop: sellerUserId={}, shopId={}", sellerUserId, order.getShopId());
+				return Result.error(ErrorCode.FORBIDDEN, "You don't have permission to update this order");
+			}
+
+			String currentStatus = order.getStatus();
+			String newStatus = request.getStatus();
+
+			// Validate status transition
+			if (!isValidStatusTransition(currentStatus, newStatus)) {
+				log.warn("Invalid status transition: orderId={}, from={}, to={}", orderId, currentStatus, newStatus);
+				return Result.error(ErrorCode.INVALID_ORDER_STATUS, 
+					String.format("Cannot change status from %s to %s", currentStatus, newStatus));
+			}
+
+			// Update order status
+			order.setStatus(newStatus);
+			Order savedOrder = orderRepository.save(order);
+
+			// Handle business logic based on status change
+			handleStatusChangeBusinessLogic(order, currentStatus, newStatus);
+
+			// Map to ShopOrderResponse
+			ShopOrderResponse response = mapToShopOrderResponse(savedOrder);
+			
+			log.info("Order status updated successfully by seller: orderId={}, from={}, to={}, sellerId={}", 
+				orderId, currentStatus, newStatus, sellerUserId);
+			return Result.success(response);
+
+		} catch (Exception e) {
+			log.error("Error updating order status by seller: orderId={}, status={}, sellerId={}", 
+				orderId, request.getStatus(), sellerUserId, e);
+			return Result.error(ErrorCode.INTERNAL_ERROR, "Failed to update order status");
+		}
+	}
+
+	/**
+	 * Lấy danh sách đơn hàng cho admin
+	 * Có thể lấy tất cả đơn hàng hoặc filter theo shopId
+	 */
+	@Transactional(readOnly = true)
+	public Result<PagedResult<ShopOrderResponse>> getAllOrdersForAdmin(ShopOrderListRequest request) {
+		try {
+			// Validate pagination parameters
+			int page = request.getPage() != null ? request.getPage() : 0;
+			int size = request.getSize() != null ? request.getSize() : 20;
+			
+			if (page < 0) {
+				log.warn("Invalid page number: page={}", page);
+				return Result.error(ErrorCode.INVALID_PAGE_NUMBER, "Page number must be >= 0");
+			}
+			
+			// Tạo Pageable với sorting
+			String sortBy = request.getSortBy() != null ? request.getSortBy() : "createdAt";
+			String sortDirection = request.getSortDirection() != null ? request.getSortDirection() : "desc";
+			Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+			Pageable pageable = PageRequest.of(page, size, sort);
+			
+			// Lấy danh sách Order với filter theo ngày và status
+			Page<Order> orders = orderRepository.findOrdersWithFilters(
+				request.getShopId(), 
+				request.getStatus(),
+				request.getFromDate(), 
+				request.getToDate(), 
+				pageable
+			);
+			
+			// Batch load tất cả thông tin cần thiết
+			List<Order> orderList = orders.getContent();
+			Map<Integer, CustomerUser> userMap = batchLoadUsers(orderList);
+			Map<Integer, Product> productMap = batchLoadProducts(orderList);
+			Map<Integer, Shop> shopMap = batchLoadShops(orderList);
+			
+			// Map sang ShopOrderResponse với thông tin đã load
+			List<ShopOrderResponse> orderResponses = orderList.stream()
+				.map(order -> mapToShopOrderResponseWithMaps(order, userMap, productMap, shopMap))
+				.collect(Collectors.toList());
+			
+			// Tạo PagedResult
+			long totalElements = orders.getTotalElements();
+			int totalPages = orders.getTotalPages();
+			
+			PagedResult<ShopOrderResponse> result = PagedResult.<ShopOrderResponse>builder()
+				.content(orderResponses)
+				.page(page)
+				.size(size)
+				.totalElements(totalElements)
+				.totalPages(totalPages)
+				.hasNext(page < totalPages - 1)
+				.hasPrevious(page > 0)
+				.build();
+			
+			log.info("Orders retrieved successfully for admin: shopId={}, count={}", 
+				request.getShopId(), totalElements);
+			return Result.success(result);
+			
+		} catch (Exception e) {
+			log.error("Error getting orders for admin: shopId={}", request.getShopId(), e);
+			return Result.error(ErrorCode.INTERNAL_ERROR, "Failed to get orders");
+		}
+	}
+
+	
+	/**
+	 * Map Order sang ShopOrderResponse
+	 */
+	private ShopOrderResponse mapToShopOrderResponse(Order order) {
+		// Lấy thông tin customer
+		CustomerUser customer = customerUserRepository.findById(order.getUserId()).orElse(null);
+		
+		// Lấy thông tin product
+		Product product = productRepository.findById(order.getProductId()).orElse(null);
+		
+		// Lấy thông tin shop
+		Shop shop = shopRepository.findById(order.getShopId()).orElse(null);
+		
+		// Map status description
+		String statusDescription = getStatusDescription(order.getStatus());
+		
+		return ShopOrderResponse.builder()
+			.id(order.getId())
+			.userId(order.getUserId())
+			.customerName(customer != null ? customer.getName() : "N/A")
+			.customerEmail(customer != null ? customer.getEmail() : "N/A")
+			.customerPhone(customer != null ? customer.getPhoneNumber() : "N/A")
+			.shopId(order.getShopId())
+			.shopName(shop != null ? shop.getName() : "N/A")
+			.productId(order.getProductId())
+			.productName(product != null ? product.getName() : "N/A")
+			.productImage(product != null ? product.getImageUrl() : null)
+			.quantity(order.getQuantity())
+			.status(order.getStatus())
+			.pickupTime(order.getPickupTime())
+			.expiresAt(order.getExpiresAt())
+			.unitPrice(order.getUnitPrice())
+			.totalPrice(order.getTotalPrice())
+			.createdAt(order.getCreatedAt())
+			.updatedAt(order.getUpdatedAt())
+			.build();
+	}
+
+	/**
+	 * Batch load tất cả User cần thiết
+	 */
+	private Map<Integer, CustomerUser> batchLoadUsers(List<Order> orders) {
+		List<Integer> userIds = orders.stream()
+			.map(Order::getUserId)
+			.distinct()
+			.collect(Collectors.toList());
+		
+		List<CustomerUser> users = customerUserRepository.findAllById(userIds);
+		return users.stream()
+			.collect(Collectors.toMap(CustomerUser::getId, Function.identity()));
+	}
+
+	/**
+	 * Batch load tất cả Product cần thiết
+	 */
+	private Map<Integer, Product> batchLoadProducts(List<Order> orders) {
+		List<Integer> productIds = orders.stream()
+			.map(Order::getProductId)
+			.distinct()
+			.collect(Collectors.toList());
+		
+		List<Product> products = productRepository.findAllById(productIds);
+		return products.stream()
+			.collect(Collectors.toMap(Product::getId, Function.identity()));
+	}
+
+	/**
+	 * Batch load tất cả Shop cần thiết
+	 */
+	private Map<Integer, Shop> batchLoadShops(List<Order> orders) {
+		List<Integer> shopIds = orders.stream()
+			.map(Order::getShopId)
+			.distinct()
+			.collect(Collectors.toList());
+		
+		List<Shop> shops = shopRepository.findAllById(shopIds);
+		return shops.stream()
+			.collect(Collectors.toMap(Shop::getId, Function.identity()));
+	}
+
+	/**
+	 * Map Order sang ShopOrderResponse với Map đã load sẵn (tối ưu nhất)
+	 */
+	private ShopOrderResponse mapToShopOrderResponseWithMaps(Order order, 
+			Map<Integer, CustomerUser> userMap, 
+			Map<Integer, Product> productMap, 
+			Map<Integer, Shop> shopMap) {
+		
+		CustomerUser customer = userMap.get(order.getUserId());
+		Product product = productMap.get(order.getProductId());
+		Shop shop = shopMap.get(order.getShopId());
+		
+		// Map status description
+		String statusDescription = getStatusDescription(order.getStatus());
+		
+		return ShopOrderResponse.builder()
+			.id(order.getId())
+			.userId(order.getUserId())
+			.customerName(customer != null ? customer.getName() : "N/A")
+			.customerEmail(customer != null ? customer.getEmail() : "N/A")
+			.customerPhone(customer != null ? customer.getPhoneNumber() : "N/A")
+			.shopId(order.getShopId())
+			.shopName(shop != null ? shop.getName() : "N/A")
+			.productId(order.getProductId())
+			.productName(product != null ? product.getName() : "N/A")
+			.productImage(product != null ? product.getImageUrl() : null)
+			.quantity(order.getQuantity())
+			.status(order.getStatus())
+			.statusDescription(statusDescription)
+			.pickupTime(order.getPickupTime())
+			.expiresAt(order.getExpiresAt())
+			.unitPrice(order.getUnitPrice())
+			.totalPrice(order.getTotalPrice())
+			.createdAt(order.getCreatedAt())
+			.updatedAt(order.getUpdatedAt())
+			.build();
+	}
+
+
+	
+	/**
+	 * Lấy mô tả trạng thái đơn hàng
+	 */
+	private String getStatusDescription(String status) {
+		if (status == null) return "Không xác định";
+		
+		switch (status) {
+			case Constants.OrderStatus.PENDING:
+				return "Đang chờ xác nhận";
+			case Constants.OrderStatus.CONFIRMED:
+				return "Đã xác nhận";
+			case Constants.OrderStatus.COMPLETED:
+				return "Hoàn thành";
+			case Constants.OrderStatus.CANCELLED:
+				return "Đã hủy";
+			default:
+				return "Không xác định";
 		}
 	}
 

@@ -2,6 +2,7 @@ package com.miniapp.foodshare.controller;
 
 import com.miniapp.foodshare.common.Result;
 import com.miniapp.foodshare.dto.*;
+import com.miniapp.foodshare.service.OrderService;
 import com.miniapp.foodshare.service.ProductManagementService;
 import com.miniapp.foodshare.service.ShopManagementService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +32,7 @@ public class SellerManagementController {
 
     private final ProductManagementService productManagementService;
     private final ShopManagementService shopManagementService;
+    private final OrderService orderService;
 
     /**
      * Lấy thông tin seller hiện tại
@@ -302,6 +304,93 @@ public class SellerManagementController {
 
         log.info("Seller get products by shop request: sellerId={}, shopId={}", sellerId, shopId);
         return productManagementService.getProductsByShopId(shopId);
+    }
+
+    // =====================================================
+    // ORDER MANAGEMENT APIs
+    // =====================================================
+
+    /**
+     * Lấy danh sách đơn hàng theo shop
+     */
+    @GetMapping("/orders/shop")
+    @Operation(
+            summary = "Lấy danh sách đơn hàng theo shop",
+            description = "Seller xem danh sách đơn hàng của shop của mình"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lấy danh sách thành công",
+                    content = @Content(schema = @Schema(implementation = ShopOrderResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Dữ liệu không hợp lệ"),
+            @ApiResponse(responseCode = "401", description = "Chưa xác thực"),
+            @ApiResponse(responseCode = "403", description = "Không có quyền truy cập shop này"),
+            @ApiResponse(responseCode = "500", description = "Lỗi server")
+    })
+    public Result<PagedResult<ShopOrderResponse>> getOrdersByShop(
+            @Parameter(description = "Tham số lọc đơn hàng")
+            @Valid ShopOrderListRequest request
+    ) {
+        Integer sellerId = getCurrentSellerId();
+        if (sellerId == null) {
+            return Result.error(INVALID_CREDENTIALS, "Unauthorized");
+        }
+
+        log.info("Seller get orders by shop request: sellerId={}, shopId={}, status={}",
+                sellerId, request.getShopId(), request.getStatus());
+
+        Result<PagedResult<ShopOrderResponse>> result = orderService.getOrdersByShop(sellerId, request);
+
+        if (result.isSuccess()) {
+            log.info("Shop orders retrieved successfully: sellerId={}, shopId={}, count={}", 
+                    sellerId, request.getShopId(), result.getData().getTotalElements());
+        } else {
+            log.warn("Shop orders retrieval failed: sellerId={}, shopId={}, code={}, message={}", 
+                    sellerId, request.getShopId(), result.getCode(), result.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Cập nhật trạng thái đơn hàng
+     */
+    @PutMapping("/orders/{orderId}/status")
+    @Operation(
+            summary = "Cập nhật trạng thái đơn hàng",
+            description = "Seller cập nhật trạng thái đơn hàng của shop mình"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cập nhật thành công",
+                    content = @Content(schema = @Schema(implementation = ShopOrderResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Dữ liệu không hợp lệ"),
+            @ApiResponse(responseCode = "401", description = "Chưa xác thực"),
+            @ApiResponse(responseCode = "403", description = "Không có quyền cập nhật đơn hàng này"),
+            @ApiResponse(responseCode = "404", description = "Không tìm thấy đơn hàng"),
+            @ApiResponse(responseCode = "500", description = "Lỗi server")
+    })
+    public Result<ShopOrderResponse> updateOrderStatus(
+            @Parameter(description = "ID của đơn hàng", required = true)
+            @PathVariable Integer orderId,
+            @Parameter(description = "Thông tin cập nhật trạng thái", required = true)
+            @Valid @RequestBody UpdateOrderStatusRequest request
+    ) {
+        Integer sellerId = getCurrentSellerId();
+        if (sellerId == null) {
+            return Result.error(INVALID_CREDENTIALS, "Unauthorized");
+        }
+
+        log.info("Seller update order status request: sellerId={}, orderId={}, newStatus={}", 
+                sellerId, orderId, request.getStatus());
+
+        Result<ShopOrderResponse> result = orderService.updateOrderStatusForSeller(orderId, request, sellerId);
+
+        if (result.isSuccess()) {
+            log.info("Order status updated successfully by seller: sellerId={}, orderId={}, newStatus={}", 
+                    sellerId, orderId, request.getStatus());
+        } else {
+            log.warn("Order status update failed by seller: sellerId={}, orderId={}, newStatus={}, code={}, message={}", 
+                    sellerId, orderId, request.getStatus(), result.getCode(), result.getMessage());
+        }
+        return result;
     }
 
 }
