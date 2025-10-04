@@ -6,7 +6,9 @@ import com.miniapp.foodshare.dto.CreateShopRequest;
 import com.miniapp.foodshare.dto.ShopManagementResponse;
 import com.miniapp.foodshare.dto.UpdateShopRequest;
 import com.miniapp.foodshare.entity.Shop;
+import com.miniapp.foodshare.entity.ShopMember;
 import com.miniapp.foodshare.repo.ShopRepository;
+import com.miniapp.foodshare.repo.ShopMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,12 +25,13 @@ import java.util.stream.Collectors;
 public class ShopManagementService {
 
     private final ShopRepository shopRepository;
+    private final ShopMemberRepository shopMemberRepository;
 
     /**
      * Tạo cửa hàng mới
      */
     @Transactional
-    public Result<ShopManagementResponse> createShop(CreateShopRequest request) {
+    public Result<ShopManagementResponse> createShop(CreateShopRequest request, Integer sellerId) {
         try {
             // Validate coordinates
             if (request.getLatitude() == null || request.getLongitude() == null) {
@@ -67,8 +70,23 @@ public class ShopManagementService {
 
             Shop savedShop = shopRepository.save(shop);
 
+            // Tạo bản ghi Shop_Member để gán seller làm owner của cửa hàng (nếu có sellerId)
+            if (sellerId != null) {
+                ShopMember shopMember = ShopMember.builder()
+                        .shopId(savedShop.getId())
+                        .backofficeUserId(sellerId)
+                        .role("OWNER")
+                        .build();
+                
+                shopMemberRepository.save(shopMember);
+                log.info("Shop created successfully: shopId={}, name={}, sellerId={}", 
+                        savedShop.getId(), savedShop.getName(), sellerId);
+            } else {
+                log.info("Shop created successfully: shopId={}, name={} (no seller assigned)", 
+                        savedShop.getId(), savedShop.getName());
+            }
+
             ShopManagementResponse response = mapToResponse(savedShop);
-            log.info("Shop created successfully: shopId={}, name={}", savedShop.getId(), savedShop.getName());
             return Result.success(response);
 
         } catch (Exception e) {
@@ -185,6 +203,37 @@ public class ShopManagementService {
         } catch (Exception e) {
             log.error("Error retrieving shop: shopId={}", shopId, e);
             return Result.error(ErrorCode.INTERNAL_ERROR, "Failed to retrieve shop");
+        }
+    }
+
+    /**
+     * Lấy danh sách cửa hàng của seller
+     */
+    @Transactional(readOnly = true)
+    public Result<List<ShopManagementResponse>> getShopsBySellerId(Integer sellerId) {
+        try {
+            // Lấy danh sách shop ID mà seller có quyền truy cập
+            List<Integer> shopIds = shopMemberRepository.findShopIdsBySellerId(sellerId);
+            
+            if (shopIds.isEmpty()) {
+                log.info("No shops found for seller: sellerId={}", sellerId);
+                return Result.success(List.of());
+            }
+
+            // Lấy thông tin chi tiết các shop
+            List<Shop> shops = shopRepository.findAllById(shopIds);
+            
+            // Map sang response
+            List<ShopManagementResponse> responses = shops.stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
+
+            log.info("Shops retrieved successfully for seller: sellerId={}, count={}", sellerId, responses.size());
+            return Result.success(responses);
+
+        } catch (Exception e) {
+            log.error("Error retrieving shops for seller: sellerId={}", sellerId, e);
+            return Result.error(ErrorCode.INTERNAL_ERROR, "Failed to retrieve shops");
         }
     }
 

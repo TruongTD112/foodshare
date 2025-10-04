@@ -35,13 +35,19 @@
           "name": "Get My Shops",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}",
+                "description": "JWT token của seller"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/seller/shops",
               "host": ["{{base_url}}"],
               "path": ["api", "seller", "shops"]
             },
-            "description": "Seller xem danh sách cửa hàng của mình"
+            "description": "Seller xem danh sách tất cả cửa hàng mà mình có quyền quản lý"
           },
           "response": []
         },
@@ -208,6 +214,10 @@
     {
       "key": "status",
       "value": "available"
+    },
+    {
+      "key": "seller_token",
+      "value": "your_seller_jwt_token_here"
     }
   ]
 }
