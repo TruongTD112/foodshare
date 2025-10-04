@@ -348,6 +348,10 @@ public class OrderService {
 			return true;
 		}
 
+		if (Constants.OrderStatus.CONFIRMED.equals(currentStatus) || !Constants.OrderStatus.PENDING.equals(newStatus)) {
+			return true;
+		}
+
 		return false;
 	}
 
