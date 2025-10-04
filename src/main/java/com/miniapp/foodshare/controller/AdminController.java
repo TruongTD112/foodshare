@@ -487,8 +487,8 @@ public class AdminController {
             return Result.error(ErrorCode.UNAUTHORIZED, "Chưa đăng nhập");
         }
 
-        log.info("Get orders request: adminId={}, shopId={}, status={}, searchKeyword={}",
-                adminId, request.getShopId(), request.getStatus(), request.getSearchKeyword());
+        log.info("Get orders request: adminId={}, shopId={}, status={}",
+                adminId, request.getShopId(), request.getStatus());
 
         Result<PagedResult<ShopOrderResponse>> result = orderService.getAllOrdersForAdmin(request);
 
