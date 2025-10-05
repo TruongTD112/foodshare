@@ -237,8 +237,13 @@ public class OrderService {
 		} else {
 			orders = orderRepository.findByUserIdAndStatusOrderByCreatedAtDesc(userId, status.trim());
 		}
+		
+		// Batch load shop và product information
+		Map<Integer, Product> productMap = batchLoadProducts(orders);
+		Map<Integer, Shop> shopMap = batchLoadShops(orders);
+		
 		List<OrderResponse> response = orders.stream()
-			.map(this::map)
+			.map(order -> mapWithDetails(order, productMap, shopMap))
 			.collect(Collectors.toList());
 		log.info("Orders retrieved successfully: userId={}, status={}, count={}", userId, status, response.size());
 		return Result.success(response);
@@ -737,6 +742,29 @@ public class OrderService {
 			.expiresAt(o.getExpiresAt())
 			.unitPrice(o.getUnitPrice())
 			.totalPrice(o.getTotalPrice())
+			.build();
+	}
+	
+	/**
+	 * Map Order sang OrderResponse với thông tin shop và product
+	 */
+	private OrderResponse mapWithDetails(Order order, Map<Integer, Product> productMap, Map<Integer, Shop> shopMap) {
+		Product product = productMap.get(order.getProductId());
+		Shop shop = shopMap.get(order.getShopId());
+		
+		return OrderResponse.builder()
+			.id(order.getId())
+			.userId(order.getUserId())
+			.shopId(order.getShopId())
+			.shopName(shop != null ? shop.getName() : "N/A")
+			.productId(order.getProductId())
+			.productName(product != null ? product.getName() : "N/A")
+			.quantity(order.getQuantity())
+			.status(order.getStatus())
+			.pickupTime(order.getPickupTime())
+			.expiresAt(order.getExpiresAt())
+			.unitPrice(order.getUnitPrice())
+			.totalPrice(order.getTotalPrice())
 			.build();
 	}
 }

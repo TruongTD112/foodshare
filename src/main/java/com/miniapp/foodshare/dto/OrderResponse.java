@@ -12,7 +12,9 @@ public class OrderResponse {
 	Integer id;
 	Integer userId;
 	Integer shopId;
+	String shopName;
 	Integer productId;
+	String productName;
 	Integer quantity;
 	String status;
 	LocalDateTime pickupTime;
