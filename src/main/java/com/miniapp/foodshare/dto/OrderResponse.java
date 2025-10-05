@@ -15,6 +15,7 @@ public class OrderResponse {
 	String shopName;
 	Integer productId;
 	String productName;
+	String productImage;
 	Integer quantity;
 	String status;
 	LocalDateTime pickupTime;
