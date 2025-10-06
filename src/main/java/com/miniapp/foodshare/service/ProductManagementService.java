@@ -4,6 +4,7 @@ import com.miniapp.foodshare.common.Constants;
 import com.miniapp.foodshare.common.ErrorCode;
 import com.miniapp.foodshare.common.Result;
 import com.miniapp.foodshare.dto.CreateProductRequest;
+import com.miniapp.foodshare.dto.PagedResult;
 import com.miniapp.foodshare.dto.ProductManagementResponse;
 import com.miniapp.foodshare.dto.UpdateProductRequest;
 import com.miniapp.foodshare.entity.Product;
@@ -233,6 +234,54 @@ public class ProductManagementService {
         } catch (Exception e) {
             log.error("Error retrieving products by shop: shopId={}", shopId, e);
             return Result.error(ErrorCode.INTERNAL_ERROR, "Failed to retrieve products by shop");
+        }
+    }
+
+    /**
+     * Lấy danh sách sản phẩm theo shop ID (có phân trang)
+     */
+    @Transactional(readOnly = true)
+    public Result<PagedResult<ProductManagementResponse>> getProductsByShopIdPaged(Integer shopId, Integer page, Integer size, String sortBy, String sortDirection) {
+        try {
+            // Validate shop exists
+            Optional<Shop> shopOptional = shopRepository.findById(shopId);
+            if (shopOptional.isEmpty()) {
+                log.warn("Shop not found: shopId={}", shopId);
+                return Result.error(ErrorCode.SHOP_NOT_FOUND, "Shop not found");
+            }
+
+            int effectivePage = page != null ? page : 0;
+            int effectiveSize = size != null && size > 0 ? size : 20;
+            String effectiveSortBy = (sortBy != null && !sortBy.isBlank()) ? sortBy : "createdAt";
+            String effectiveDirection = (sortDirection != null && !sortDirection.isBlank()) ? sortDirection : "desc";
+
+            org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(effectiveDirection), effectiveSortBy
+            );
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(effectivePage, effectiveSize, sort);
+
+            org.springframework.data.domain.Page<Product> productPage = productRepository.findByShopId(shopId, pageable);
+
+            List<ProductManagementResponse> content = productPage.getContent().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+
+            PagedResult<ProductManagementResponse> result = PagedResult.<ProductManagementResponse>builder()
+                .content(content)
+                .page(effectivePage)
+                .size(effectiveSize)
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .hasNext(effectivePage < productPage.getTotalPages() - 1)
+                .hasPrevious(effectivePage > 0)
+                .build();
+
+            log.info("Retrieved products by shop (paged): shopId={}, page={}, size={}, totalElements={}", shopId, effectivePage, effectiveSize, productPage.getTotalElements());
+            return Result.success(result);
+
+        } catch (Exception e) {
+            log.error("Error retrieving products by shop (paged): shopId={}", shopId, e);
+            return Result.error(ErrorCode.INTERNAL_ERROR, "Failed to retrieve products by shop (paged)");
         }
     }
 

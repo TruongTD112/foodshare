@@ -315,9 +315,17 @@ public class SellerManagementController {
             @ApiResponse(responseCode = "404", description = "Shop không tồn tại"),
             @ApiResponse(responseCode = "500", description = "Lỗi server")
     })
-    public Result<List<ProductManagementResponse>> getProductsByShop(
+    public Result<PagedResult<ProductManagementResponse>> getProductsByShop(
             @Parameter(description = "ID của shop", example = "1", required = true)
-            @PathVariable Integer shopId
+            @PathVariable Integer shopId,
+            @Parameter(description = "Trang hiện tại (bắt đầu từ 0)")
+            @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+            @Parameter(description = "Kích thước trang")
+            @RequestParam(name = "size", required = false, defaultValue = "20") Integer size,
+            @Parameter(description = "Trường sắp xếp")
+            @RequestParam(name = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Chiều sắp xếp: asc|desc")
+            @RequestParam(name = "sortDirection", required = false, defaultValue = "desc") String sortDirection
     ) {
         Integer sellerId = getCurrentSellerId();
         if (sellerId == null) {
@@ -326,8 +334,9 @@ public class SellerManagementController {
 
         // TODO: Kiểm tra seller có quyền truy cập shop này không
 
-        log.info("Seller get products by shop request: sellerId={}, shopId={}", sellerId, shopId);
-        return productManagementService.getProductsByShopId(shopId);
+        log.info("Seller get products by shop request: sellerId={}, shopId={}, page={}, size={}, sortBy={}, sortDirection={}",
+                sellerId, shopId, page, size, sortBy, sortDirection);
+        return productManagementService.getProductsByShopIdPaged(shopId, page, size, sortBy, sortDirection);
     }
 
     // =====================================================

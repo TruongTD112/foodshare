@@ -5,6 +5,7 @@ import com.miniapp.foodshare.common.ErrorCode;
 import com.miniapp.foodshare.common.Result;
 import com.miniapp.foodshare.dto.PagedResult;
 import com.miniapp.foodshare.dto.ProductDetailResponse;
+import com.miniapp.foodshare.dto.ProductResponse;
 import com.miniapp.foodshare.dto.ProductSearchItem;
 import com.miniapp.foodshare.entity.Product;
 import com.miniapp.foodshare.entity.ProductSalesStats;
@@ -613,5 +614,76 @@ public class ProductService {
                 * Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
+    }
+
+    /**
+     * Lấy danh sách sản phẩm theo shop ID với phân trang
+     */
+    @Transactional(readOnly = true)
+    public Result<PagedResult<ProductResponse>> getProductsByShop(Integer shopId, Integer page, Integer size, String sortBy, String sortDirection) {
+        try {
+            // Validate shop exists
+            Optional<Shop> shopOptional = shopRepository.findById(shopId);
+            if (shopOptional.isEmpty()) {
+                log.warn("Shop not found: shopId={}", shopId);
+                return Result.error(ErrorCode.SHOP_NOT_FOUND, "Shop not found");
+            }
+
+            int effectivePage = page != null ? page : 0;
+            int effectiveSize = size != null && size > 0 ? size : 20;
+            String effectiveSortBy = (sortBy != null && !sortBy.isBlank()) ? sortBy : "createdAt";
+            String effectiveDirection = (sortDirection != null && !sortDirection.isBlank()) ? sortDirection : "desc";
+
+            org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(
+                org.springframework.data.domain.Sort.Direction.fromString(effectiveDirection), effectiveSortBy
+            );
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(effectivePage, effectiveSize, sort);
+
+            org.springframework.data.domain.Page<Product> productPage = productRepository.findByShopId(shopId, pageable);
+
+            List<ProductResponse> content = productPage.getContent().stream()
+                .filter(this::isProductActive)
+                .map(this::mapToProductResponse)
+                .collect(Collectors.toList());
+
+            PagedResult<ProductResponse> result = PagedResult.<ProductResponse>builder()
+                .content(content)
+                .page(effectivePage)
+                .size(effectiveSize)
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .hasNext(effectivePage < productPage.getTotalPages() - 1)
+                .hasPrevious(effectivePage > 0)
+                .build();
+
+            log.info("Retrieved products by shop: shopId={}, page={}, size={}, totalElements={}", shopId, effectivePage, effectiveSize, productPage.getTotalElements());
+            return Result.success(result);
+
+        } catch (Exception e) {
+            log.error("Error retrieving products by shop: shopId={}", shopId, e);
+            return Result.error(ErrorCode.INTERNAL_ERROR, "Failed to retrieve products by shop");
+        }
+    }
+
+    /**
+     * Map Product entity to ProductResponse
+     */
+    private ProductResponse mapToProductResponse(Product product) {
+        return ProductResponse.builder()
+                .id(product.getId())
+                .shopId(product.getShopId())
+                .categoryId(product.getCategoryId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .originalPrice(product.getOriginalPrice())
+                .imageUrl(product.getImageUrl())
+                .detailImageUrl(product.getDetailImageUrl())
+                .quantityAvailable(product.getQuantityAvailable())
+                .quantityPending(product.getQuantityPending())
+                .status(product.getStatus())
+                .createdAt(product.getCreatedAt())
+                .updatedAt(product.getUpdatedAt())
+                .build();
     }
 }

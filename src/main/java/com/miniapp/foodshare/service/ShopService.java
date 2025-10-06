@@ -36,22 +36,6 @@ public class ShopService {
 			return Result.error(ErrorCode.SHOP_NOT_ACTIVE, "Shop is not active");
 		}
 
-		List<Product> products = productRepository.findByShopId(shopId);
-		List<ShopDetailResponse.ProductItem> productItems = products.stream()
-			.filter(p -> p.getStatus() != null && p.getStatus().trim().equals(Constants.ProductStatus.ACTIVE))
-			.map(p -> ShopDetailResponse.ProductItem.builder()
-				.id(p.getId())
-				.categoryId(p.getCategoryId())
-				.name(p.getName())
-				.description(p.getDescription())
-				.price(p.getPrice())
-				.imageUrl(p.getImageUrl())
-				.quantityAvailable(p.getQuantityAvailable())
-				.quantityPending(p.getQuantityPending())
-				.status(p.getStatus())
-				.build())
-			.collect(Collectors.toList());
-
 		ShopDetailResponse response = ShopDetailResponse.builder()
 			.id(shop.getId())
 			.name(shop.getName())
@@ -63,10 +47,9 @@ public class ShopService {
 			.description(shop.getDescription())
 			.rating(shop.getRating())
 			.status(shop.getStatus())
-			.products(productItems)
 			.build();
 
-		log.info("Shop detail retrieved successfully: shopId={}, productCount={}", shopId, productItems.size());
+		log.info("Shop detail retrieved successfully: shopId={}", shopId);
 		return Result.success(response);
 	}
 } 
