@@ -1,5 +1,5 @@
 [build]
-buildCommand = "./gradlew clean build -x test"
+buildCommand = "./gradlew clean bootJar -x test && ls -l build/libs"
 
 [env]
 JAVA_VERSION = "21"
