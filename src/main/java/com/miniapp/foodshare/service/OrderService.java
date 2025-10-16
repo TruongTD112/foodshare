@@ -333,16 +333,7 @@ public class OrderService {
             return false;
         }
 
-        // Có thể chuyển sang bất kỳ trạng thái nào từ pending
-        if (Constants.OrderStatus.PENDING.equals(currentStatus)) {
-            return true;
-        }
-
-        if (Constants.OrderStatus.CONFIRMED.equals(currentStatus) && !Constants.OrderStatus.PENDING.equals(newStatus)) {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
