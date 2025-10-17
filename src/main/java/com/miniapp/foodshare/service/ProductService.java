@@ -44,7 +44,7 @@ public class ProductService {
      * <p>
      * Thứ tự ưu tiên:
      * 1. Tên sản phẩm match (1000 điểm)
-     * 2. Có giảm giá (500 điểm)
+     * 2. Có giảm giá (500 điểm) 
      * 3. Khoảng cách gần (1000 - distance_km điểm)
      * <p>
      * Behavior:
@@ -52,7 +52,8 @@ public class ProductService {
      * - Nếu có latitude/longitude: tính khoảng cách và ưu tiên gần
      * - Nếu có maxDistanceKm: lọc theo khoảng cách tối đa
      * - Nếu có minPrice/maxPrice: lọc theo khoảng giá
-     * - Sắp xếp theo điểm ưu tiên giảm dần, sau đó theo khoảng cách tăng dần
+     * - Nếu có minDiscount: lọc theo mức giảm giá tối thiểu
+     * - Nếu có sortBy: sắp xếp theo trường được chỉ định
      * - Chỉ lấy sản phẩm và cửa hàng active
      *
      * @param nameQuery     tên sản phẩm để tìm kiếm (tùy chọn)
@@ -61,7 +62,9 @@ public class ProductService {
      * @param maxDistanceKm khoảng cách tối đa (km) (tùy chọn)
      * @param minPrice      giá tối thiểu (tùy chọn)
      * @param maxPrice      giá tối đa (tùy chọn)
-     * @param priceSort     sắp xếp theo giá (bỏ qua, sử dụng priority score)
+     * @param minDiscount   mức giảm giá tối thiểu (%) (tùy chọn)
+     * @param sortBy        trường để sắp xếp (name, price, discount, distance) (tùy chọn)
+     * @param sortDirection hướng sắp xếp (asc, desc) (tùy chọn)
      * @param page          số trang (0-based, mặc định: 0)
      * @param size          kích thước trang (mặc định: 20)
      * @return danh sách sản phẩm được phân trang với thông tin cửa hàng và khoảng cách
@@ -74,7 +77,9 @@ public class ProductService {
             Double maxDistanceKm,
             BigDecimal minPrice,
             BigDecimal maxPrice,
-            String priceSort,
+            BigDecimal minDiscount,
+            String sortBy,
+            String sortDirection,
             int page,
             int size
     ) {
@@ -98,16 +103,16 @@ public class ProductService {
             return Result.error(ErrorCode.INVALID_REQUEST, "Longitude must be between -180 and 180 degrees");
         }
 
-        log.info("Searching products with priority: nameQuery={}, hasCoords={}, maxDistanceKm={}, minPrice={}, maxPrice={}, page={}, size={}",
-                nameQuery, latitude != null && longitude != null, maxDistanceKm, minPrice, maxPrice, page, size);
+        log.info("Searching products with priority: nameQuery={}, hasCoords={}, maxDistanceKm={}, minPrice={}, maxPrice={}, minDiscount={}, sortBy={}, sortDirection={}, page={}, size={}", 
+                nameQuery, latitude != null && longitude != null, maxDistanceKm, minPrice, maxPrice, minDiscount, sortBy, sortDirection, page, size);
 
         try {
             // Create pageable for database query
             Pageable pageable = PageRequest.of(page, size);
 
-            // Use native query with priority scoring
+            // Use native query with priority scoring and sorting
             List<Object[]> results = productRepository.searchProductsWithPriority(
-                    nameQuery, latitude, longitude, maxDistanceKm, minPrice, maxPrice, pageable
+                nameQuery, latitude, longitude, maxDistanceKm, minPrice, maxPrice, minDiscount, sortBy, sortDirection, pageable
             );
 
             // Convert results to ProductSearchItem
@@ -158,25 +163,25 @@ public class ProductService {
                     continue;
                 }
             }
-
+            
             // For native query, we need to get total count separately
             // This is a limitation of native queries with pagination
             int totalElements = items.size(); // Simplified for now
             int totalPages = (int) Math.ceil((double) totalElements / size);
-
-            PagedResult<ProductSearchItem> result = PagedResult.<ProductSearchItem>builder()
-                    .content(items)
-                    .page(page)
-                    .size(size)
-                    .totalElements(totalElements)
-                    .totalPages(totalPages)
-                    .hasNext(page < totalPages - 1)
-                    .hasPrevious(page > 0)
-                    .build();
+        
+        PagedResult<ProductSearchItem> result = PagedResult.<ProductSearchItem>builder()
+                .content(items)
+                .page(page)
+                .size(size)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .hasNext(page < totalPages - 1)
+                .hasPrevious(page > 0)
+                .build();
 
             log.info("Products search completed with priority: nameQuery={}, found={}, hasCoords={}, page={}, size={}, totalElements={}",
                     nameQuery, items.size(), latitude != null && longitude != null, page, size, totalElements);
-            return Result.success(result);
+        return Result.success(result);
 
         } catch (Exception e) {
             log.error("Error searching products: {}", e.getMessage(), e);
@@ -187,7 +192,7 @@ public class ProductService {
     /**
      * Tìm kiếm sản phẩm gần đây dựa trên vị trí người dùng với khoảng cách mặc định.
      * Sử dụng native query để tính khoảng cách trực tiếp trong database, tối ưu hiệu suất.
-     *
+     * 
      * @param latitude vĩ độ của người dùng (bắt buộc)
      * @param longitude kinh độ của người dùng (bắt buộc)
      * @param page số trang (mặc định: 0)
@@ -229,7 +234,7 @@ public class ProductService {
 
         // Use default max distance from constants
         Double maxDistanceKm = Constants.Distance.DEFAULT_MAX_DISTANCE_KM;
-
+        
         log.info("Searching nearby products with native query: latitude={}, longitude={}, maxDistanceKm={}, page={}, size={}",
                 latitude, longitude, maxDistanceKm, page, size);
 

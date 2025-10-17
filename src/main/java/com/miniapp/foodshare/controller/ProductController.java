@@ -45,7 +45,9 @@ public class ProductController {
 	 * @param maxDistanceKm optional maximum distance in kilometers; items farther are excluded
 	 * @param minPrice optional minimum price filter
 	 * @param maxPrice optional maximum price filter
-	 * @param priceSort optional price sorting: "asc" or "desc"
+	 * @param minDiscount optional minimum discount percentage filter
+	 * @param sortBy optional sorting field: "name", "price", "discount", "distance"
+	 * @param sortDirection optional sorting direction: "asc" or "desc"
 	 * @param page page number (0-based, default: 0)
 	 * @param size page size (default: 20, max: 100)
 	 * @return paginated list of products with shop info and distance (if coords are provided)
@@ -74,8 +76,12 @@ public class ProductController {
 			@RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
 			@Parameter(description = "Maximum price filter", example = "50000")
 			@RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
-			@Parameter(description = "Price sorting: 'asc' or 'desc'", example = "asc")
-			@RequestParam(name = "priceSort", required = false) String priceSort,
+			@Parameter(description = "Minimum discount percentage filter", example = "20")
+			@RequestParam(name = "minDiscount", required = false) BigDecimal minDiscount,
+			@Parameter(description = "Sorting field: 'name', 'price', 'discount', 'distance'", example = "price")
+			@RequestParam(name = "sortBy", required = false) String sortBy,
+			@Parameter(description = "Sorting direction: 'asc' or 'desc'", example = "asc")
+			@RequestParam(name = "sortDirection", required = false) String sortDirection,
 			@Parameter(description = "Page number (0-based)", example = "0")
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@Parameter(description = "Page size (max: 100)", example = "20")
@@ -89,11 +95,11 @@ public class ProductController {
 			page = Constants.Pagination.DEFAULT_PAGE_NUMBER;
 		}
 		
-		Result<PagedResult<ProductSearchItem>> result = productService.searchProducts(name, latitude, longitude, maxDistanceKm, minPrice, maxPrice, priceSort, page, size);
+		Result<PagedResult<ProductSearchItem>> result = productService.searchProducts(name, latitude, longitude, maxDistanceKm, minPrice, maxPrice, minDiscount, sortBy, sortDirection, page, size);
 		if (result.isSuccess()) {
 			PagedResult<ProductSearchItem> data = result.getData();
-			log.info("Product search completed successfully: name={}, found={}, hasCoords={}, page={}, size={}, totalElements={}, totalPages={}", 
-				name, data.getContent().size(), latitude != null && longitude != null, page, size, data.getTotalElements(), data.getTotalPages());
+			log.info("Product search completed successfully: name={}, found={}, hasCoords={}, minDiscount={}, sortBy={}, sortDirection={}, page={}, size={}, totalElements={}, totalPages={}", 
+				name, data.getContent().size(), latitude != null && longitude != null, minDiscount, sortBy, sortDirection, page, size, data.getTotalElements(), data.getTotalPages());
 		} else {
 			log.warn("Product search failed: code={}, message={}", result.getCode(), result.getMessage());
 		}

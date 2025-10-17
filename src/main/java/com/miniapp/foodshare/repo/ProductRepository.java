@@ -182,7 +182,30 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 		  -- Lọc theo giá (nếu có)
 		  AND (:minPrice IS NULL OR p.price >= :minPrice)
 		  AND (:maxPrice IS NULL OR p.price <= :maxPrice)
+		  -- Lọc theo mức giảm giá tối thiểu (nếu có)
+		  AND (:minDiscount IS NULL OR (
+		      p.original_price IS NOT NULL 
+		      AND p.price IS NOT NULL 
+		      AND p.original_price > p.price
+		      AND ((p.original_price - p.price) / p.original_price * 100) >= :minDiscount
+		  ))
 		ORDER BY 
+		    CASE WHEN :sortBy = 'name' AND :sortDirection = 'desc' THEN p.name END DESC,
+		    CASE WHEN :sortBy = 'name' AND (:sortDirection IS NULL OR :sortDirection = 'asc') THEN p.name END ASC,
+		    CASE WHEN :sortBy = 'price' AND :sortDirection = 'desc' THEN p.price END DESC,
+		    CASE WHEN :sortBy = 'price' AND (:sortDirection IS NULL OR :sortDirection = 'asc') THEN p.price END ASC,
+		    CASE WHEN :sortBy = 'discount' AND :sortDirection = 'desc' THEN 
+		        CASE WHEN p.original_price IS NOT NULL AND p.price IS NOT NULL AND p.original_price > p.price 
+		             THEN ((p.original_price - p.price) / p.original_price * 100) 
+		             ELSE 0 END
+		    END DESC,
+		    CASE WHEN :sortBy = 'discount' AND (:sortDirection IS NULL OR :sortDirection = 'asc') THEN 
+		        CASE WHEN p.original_price IS NOT NULL AND p.price IS NOT NULL AND p.original_price > p.price 
+		             THEN ((p.original_price - p.price) / p.original_price * 100) 
+		             ELSE 0 END
+		    END ASC,
+		    CASE WHEN :sortBy = 'distance' AND :sortDirection = 'desc' THEN distance_km END DESC,
+		    CASE WHEN :sortBy = 'distance' AND (:sortDirection IS NULL OR :sortDirection = 'asc') THEN distance_km END ASC,
 		    priority_score DESC,
 		    distance_km ASC
 		""", nativeQuery = true)
@@ -193,6 +216,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 		@Param("maxDistanceKm") Double maxDistanceKm,
 		@Param("minPrice") BigDecimal minPrice,
 		@Param("maxPrice") BigDecimal maxPrice,
+		@Param("minDiscount") BigDecimal minDiscount,
+		@Param("sortBy") String sortBy,
+		@Param("sortDirection") String sortDirection,
 		Pageable pageable
 	);
 }
