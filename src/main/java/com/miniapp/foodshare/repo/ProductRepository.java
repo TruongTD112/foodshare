@@ -93,7 +93,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	);
 	
 	/**
-	 * Tìm kiếm sản phẩm tổng quát với thứ tự ưu tiên: name → discount → distance
+	 * Tìm kiếm sản phẩm tổng quát với thứ tự ưu tiên: name → distance → discount
 	 * Sử dụng native query để tối ưu hiệu suất và sắp xếp thông minh
 	 */
 	@Query(value = """
@@ -128,7 +128,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 		        )
 		        ELSE NULL
 		    END as distance_km,
-		    -- Tính điểm ưu tiên: name → discount → distance
+		    -- Tính điểm ưu tiên: name → distance → discount
 		    (
 		        -- Ưu tiên 1: Tên sản phẩm (1000 điểm nếu match)
 		        CASE 
@@ -137,15 +137,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 		            THEN 1000
 		            ELSE 0
 		        END +
-		        -- Ưu tiên 2: Có giảm giá (500 điểm)
-		        CASE 
-		            WHEN p.original_price IS NOT NULL 
-		                 AND p.price IS NOT NULL 
-		                 AND p.original_price > p.price
-		            THEN 500
-		            ELSE 0
-		        END +
-		        -- Ưu tiên 3: Khoảng cách gần (1000 - distance_km, tối đa 1000 điểm)
+		        -- Ưu tiên 2: Khoảng cách gần (1000 - distance_km, tối đa 1000 điểm)
 		        CASE 
 		            WHEN :latitude IS NOT NULL AND :longitude IS NOT NULL 
 		                 AND s.latitude IS NOT NULL AND s.longitude IS NOT NULL
@@ -158,6 +150,14 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 		                    SIN(RADIANS(s.latitude))
 		                ), 0
 		            ))
+		            ELSE 0
+		        END +
+		        -- Ưu tiên 3: Có giảm giá (500 điểm)
+		        CASE 
+		            WHEN p.original_price IS NOT NULL 
+		                 AND p.price IS NOT NULL 
+		                 AND p.original_price > p.price
+		            THEN 500
 		            ELSE 0
 		        END
 		    ) as priority_score
