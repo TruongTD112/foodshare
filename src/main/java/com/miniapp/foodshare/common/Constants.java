@@ -85,7 +85,7 @@ public final class Constants {
         public static final double MIN_PRICE = 0.01;
         public static final double MAX_PRICE = 999999.99;
         public static final int MIN_QUANTITY = 1;
-        public static final int MAX_QUANTITY = 9999;
+        public static final int MAX_QUANTITY = 20;
         
         private Validation() {}
     }

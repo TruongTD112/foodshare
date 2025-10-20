@@ -76,7 +76,7 @@ public class OrderService {
 
         Integer available = product.getQuantityAvailable() == null ? 0 : product.getQuantityAvailable();
         Integer pending = product.getQuantityPending() == null ? 0 : product.getQuantityPending();
-        if (req.getQuantity() > (available - pending)) {
+        if (req.getQuantity() > available) {
             log.warn("Insufficient stock: requested={}, available={}, pending={}", req.getQuantity(), available, pending);
             return Result.error(ErrorCode.INSUFFICIENT_STOCK, "Insufficient stock");
         }
@@ -137,6 +137,7 @@ public class OrderService {
         Order saved = orderRepository.save(order);
 
         product.setQuantityPending(pending + req.getQuantity());
+        product.setQuantityAvailable(available - req.getQuantity());
         productRepository.save(product);
 
         OrderResponse response = OrderResponse.builder()
@@ -254,7 +255,7 @@ public class OrderService {
             log.info("Order already cancelled: orderId={}", orderId);
             return Result.success(map(order));
         }
-        if (!Constants.OrderStatus.PENDING.equals(status)) {
+        if (!Constants.OrderStatus.PENDING.equals(status) && !Constants.OrderStatus.CONFIRMED.equals(status)) {
             log.warn("Order cannot be cancelled: orderId={}, status={}", orderId, status);
             return Result.error(ErrorCode.ORDER_CANNOT_BE_CANCELLED, "Only pending orders can be cancelled");
         }
@@ -265,9 +266,12 @@ public class OrderService {
             return Result.error(ErrorCode.PRODUCT_NOT_FOUND, "Product not found: " + order.getProductId());
         }
         Integer pending = product.getQuantityPending() == null ? 0 : product.getQuantityPending();
+        Integer available = product.getQuantityAvailable() == null ? 0 : product.getQuantityAvailable();
         int newPending = pending - (order.getQuantity() == null ? 0 : order.getQuantity());
+        int newAvaliable = available + (order.getQuantity() == null ? 0 : order.getQuantity());
         if (newPending < 0) newPending = 0;
         product.setQuantityPending(newPending);
+        product.setQuantityAvailable(newAvaliable);
         productRepository.save(product);
 
         order.setStatus(Constants.OrderStatus.CANCELLED);
