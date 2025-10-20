@@ -41,7 +41,7 @@ public interface ProductSalesStatsRepository extends JpaRepository<ProductSalesS
 	 */
 	@Modifying
 	@Transactional
-	@Query(value = "INSERT INTO ProductSalesStats (product_id, total_quantity_sold, total_orders, last_sold_at) " +
+	@Query(value = "INSERT INTO Product_Sales_Stats(product_id, total_quantity_sold, total_orders, last_sold_at) " +
 		   "VALUES (:productId, :quantity, 1, NOW()) " +
 		   "ON DUPLICATE KEY UPDATE " +
 		   "total_quantity_sold = total_quantity_sold + :quantity, " +
