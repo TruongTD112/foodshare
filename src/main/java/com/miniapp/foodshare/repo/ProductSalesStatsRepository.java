@@ -45,7 +45,7 @@ public interface ProductSalesStatsRepository extends JpaRepository<ProductSalesS
 		   "VALUES (:productId, :quantity, 1, NOW()) " +
 		   "ON DUPLICATE KEY UPDATE " +
 		   "total_quantity_sold = total_quantity_sold + :quantity, " +
-		   "total_orders = total_orders + 1, " +
+		   "total_orders = total_orders + :quantity, " +
 		   "last_sold_at = NOW()", nativeQuery = true)
 	void updateSalesStats(@Param("productId") Integer productId, @Param("quantity") Integer quantity);
 }
