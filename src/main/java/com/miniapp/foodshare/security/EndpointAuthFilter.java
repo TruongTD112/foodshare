@@ -30,7 +30,8 @@ public class EndpointAuthFilter extends OncePerRequestFilter {
 		"/api/seller/**",          // Seller APIs - cần authentication  
 		"/api/orders/**",          // Order APIs - cần authentication
 		"/orders/**",          // Order APIs - cần authentication
-		"/api/users/**"            // User APIs - cần authentication
+		"/api/users/**",            // User APIs - cần authentication
+		"/api/back-office/auth/me"
 	};
 	
 	private static final String REQUEST_ID_KEY = "requestId";
@@ -67,7 +68,7 @@ public class EndpointAuthFilter extends OncePerRequestFilter {
 				}
 				
 				// Kiểm tra role cho admin APIs
-				if (path.startsWith("/api/admin/")) {
+				if (path.startsWith("/api/admin/") || "me".equalsIgnoreCase(path)) {
 					if (!isAdminToken(token)) {
 						log.warn("Access denied - Admin role required for path: {} - RequestId: {}", path, requestId);
 						response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -77,7 +78,7 @@ public class EndpointAuthFilter extends OncePerRequestFilter {
 				}
 				
 				// Kiểm tra role cho seller APIs
-				if (path.startsWith("/api/seller/")) {
+				if (path.startsWith("/api/seller/") || "me".equalsIgnoreCase(path)) {
 					if (!isSellerOrAdminToken(token)) {
 						log.warn("Access denied - Seller or Admin role required for path: {} - RequestId: {}", path, requestId);
 						response.setStatus(HttpServletResponse.SC_FORBIDDEN);
