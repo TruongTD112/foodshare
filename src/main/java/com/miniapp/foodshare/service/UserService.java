@@ -3,6 +3,7 @@ package com.miniapp.foodshare.service;
 import com.miniapp.foodshare.common.Result;
 import com.miniapp.foodshare.common.ErrorCode;
 import com.miniapp.foodshare.dto.UpdateUserRequest;
+import com.miniapp.foodshare.dto.UpdateUserLocationRequest;
 import com.miniapp.foodshare.dto.UserInfoResponse;
 import com.miniapp.foodshare.entity.CustomerUser;
 import com.miniapp.foodshare.repo.CustomerUserRepository;
@@ -57,6 +58,8 @@ public class UserService {
                 .email(savedUser.getEmail())
                 .phoneNumber(savedUser.getPhoneNumber())
                 .profilePictureUrl(savedUser.getProfilePictureUrl())
+                .latitude(savedUser.getLatitude())
+                .longitude(savedUser.getLongitude())
                 .build();
         
         log.info("User updated successfully: userId={}, name={}, email={}", 
@@ -85,9 +88,59 @@ public class UserService {
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
                 .profilePictureUrl(user.getProfilePictureUrl())
+                .latitude(user.getLatitude())
+                .longitude(user.getLongitude())
                 .build();
         
         log.info("User info retrieved successfully: userId={}, name={}", userId, user.getName());
+        return Result.success(response);
+    }
+    
+    /**
+     * Cập nhật tọa độ vị trí của người dùng
+     * 
+     * @param userId ID của người dùng
+     * @param request Thông tin tọa độ cập nhật (latitude, longitude)
+     * @return Thông tin người dùng sau khi cập nhật
+     */
+    @Transactional
+    public Result<UserInfoResponse> updateUserLocation(Integer userId, UpdateUserLocationRequest request) {
+        // Tìm user theo ID
+        CustomerUser user = customerUserRepository.findById(userId).orElse(null);
+        if (user == null) {
+            log.warn("User not found: userId={}", userId);
+            return Result.error(ErrorCode.USER_NOT_FOUND, "User not found: " + userId);
+        }
+        
+        // Cập nhật latitude nếu không null
+        if (request.getLatitude() != null) {
+            user.setLatitude(request.getLatitude());
+            log.info("Updating latitude for userId={}: {}", userId, request.getLatitude());
+        }
+        
+        // Cập nhật longitude nếu không null
+        if (request.getLongitude() != null) {
+            user.setLongitude(request.getLongitude());
+            log.info("Updating longitude for userId={}: {}", userId, request.getLongitude());
+        }
+        
+        // Lưu vào database
+        CustomerUser savedUser = customerUserRepository.save(user);
+        
+        // Tạo response với tọa độ
+        UserInfoResponse response = UserInfoResponse.builder()
+                .id(savedUser.getId())
+                .name(savedUser.getName())
+                .email(savedUser.getEmail())
+                .phoneNumber(savedUser.getPhoneNumber())
+                .profilePictureUrl(savedUser.getProfilePictureUrl())
+                .latitude(savedUser.getLatitude())
+                .longitude(savedUser.getLongitude())
+                .build();
+        
+        log.info("User location updated successfully: userId={}, latitude={}, longitude={}", 
+                userId, savedUser.getLatitude(), savedUser.getLongitude());
+        
         return Result.success(response);
     }
 }

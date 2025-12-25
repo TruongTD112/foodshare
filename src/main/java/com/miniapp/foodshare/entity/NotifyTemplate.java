@@ -17,6 +17,9 @@ public class NotifyTemplate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "status", nullable = false)
+    private String status;
+
     @Column(nullable = false)
     private Double radius;
 
