@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import com.miniapp.foodshare.common.UserRole;
 
@@ -57,6 +58,12 @@ public class CustomerUser {
 	@Column(name = "role", nullable = false, length = 20)
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
+
+	@Column(precision = 10, scale = 8)
+	private BigDecimal latitude;
+
+	@Column(precision = 11, scale = 8)
+	private BigDecimal longitude;
 
 	@Column(name = "created_at", insertable = false, updatable = false)
 	private LocalDateTime createdAt;
