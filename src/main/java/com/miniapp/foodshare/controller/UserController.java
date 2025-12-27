@@ -151,7 +151,7 @@ public class UserController {
      * Cập nhật tọa độ vị trí của người dùng
      * Cần xác thực: Lấy userId từ JWT token hoặc session
      */
-    @PutMapping("/{userId}/location")
+    @PutMapping("/location")
     @Operation(
         summary = "Cập nhật tọa độ vị trí người dùng",
         description = "API cập nhật tọa độ vị trí (latitude, longitude) của người dùng. Chỉ cập nhật các giá trị không null. Cần xác thực để lấy userId."
@@ -165,11 +165,18 @@ public class UserController {
         @ApiResponse(responseCode = "500", description = "Lỗi server")
     })
     public Result<UserInfoResponse> updateUserLocation(
-            @Parameter(description = "ID của người dùng", example = "1", required = true)
-            @PathVariable Integer userId,
             @Parameter(description = "Thông tin tọa độ cập nhật", required = true)
             @Valid @RequestBody UpdateUserLocationRequest request
     ) {
+        // Lấy userId từ SecurityContext sau khi đã đi qua filter xác thực
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Integer userId = auth != null && auth.getPrincipal() instanceof Integer ? (Integer) auth.getPrincipal() : null;
+
+        if (userId == null) {
+            log.warn("Unauthorized access attempt to save Firebase token");
+            return Result.error(ErrorCode.UNAUTHORIZED, "Unauthorized");
+        }
+
         log.info("Update user location request: userId={}, latitude={}, longitude={}", 
                 userId, request.getLatitude(), request.getLongitude());
         

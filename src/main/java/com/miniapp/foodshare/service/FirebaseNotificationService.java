@@ -3,14 +3,19 @@ package com.miniapp.foodshare.service;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.firebase.messaging.*;
+import com.google.firebase.messaging.BatchResponse;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.MulticastMessage;
+import com.google.firebase.messaging.SendResponse;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -18,19 +23,24 @@ import java.util.Map;
 @Service
 public class FirebaseNotificationService {
 
-    @Value("classpath:serviceAccountKey.json")
-    private Resource serviceAccountResource;
+    @Value("${firebaseConfigJson}")
+    private String firebaseConfigJson;
 
     @PostConstruct
     public void initializeFirebase() {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
+                // Chuyển đổi String JSON thành InputStream
+                InputStream serviceAccountStream = new ByteArrayInputStream(
+                        firebaseConfigJson.getBytes(StandardCharsets.UTF_8)
+                );
+
                 FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccountResource.getInputStream()))
+                        .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
                         .build();
 
                 FirebaseApp.initializeApp(options);
-                log.info("Firebase initialized successfully");
+                log.info("Firebase initialized successfully from JSON string");
             }
         } catch (IOException e) {
             log.error("Error initializing Firebase: {}", e.getMessage(), e);
@@ -39,11 +49,11 @@ public class FirebaseNotificationService {
 
     /**
      * Gửi batch notification với title, body và data tùy chỉnh
-     * 
+     *
      * @param registrationTokens danh sách Firebase tokens
-     * @param title tiêu đề thông báo
-     * @param body nội dung thông báo
-     * @param dataMap dữ liệu bổ sung (metadata)
+     * @param title              tiêu đề thông báo
+     * @param body               nội dung thông báo
+     * @param dataMap            dữ liệu bổ sung (metadata)
      * @return BatchResponse chứa kết quả gửi
      */
     public BatchResponse sendBatchNotification(List<String> registrationTokens, String title, String body, Map<String, String> dataMap) {
@@ -53,23 +63,20 @@ public class FirebaseNotificationService {
                 return null;
             }
 
-            // Tạo MulticastMessage với title, body và data
             MulticastMessage.Builder messageBuilder = MulticastMessage.builder()
-                    .setNotification(Notification.builder()
-                            .setTitle(title)
-                            .setBody(body)
-                            .build())
                     .addAllTokens(registrationTokens);
 
-            // Thêm data nếu có
+            // Thêm data (bắt buộc)
+            messageBuilder.putData("title", title);
+            messageBuilder.putData("ok", title);
+            messageBuilder.putData("body", body);
+
+            // Thêm data động (link, type, id...)
             if (dataMap != null && !dataMap.isEmpty()) {
                 for (Map.Entry<String, String> entry : dataMap.entrySet()) {
                     messageBuilder.putData(entry.getKey(), entry.getValue());
                 }
             }
-
-            // Thêm click_action mặc định
-            messageBuilder.putData("click_action", "FLUTTER_NOTIFICATION_CLICK");
 
             MulticastMessage message = messageBuilder.build();
 
@@ -81,15 +88,15 @@ public class FirebaseNotificationService {
                 List<SendResponse> responses = response.getResponses();
                 for (int i = 0; i < responses.size(); i++) {
                     if (!responses.get(i).isSuccessful()) {
-                        log.warn("Token failed: {}, reason: {}", 
-                                registrationTokens.get(i), 
-                                responses.get(i).getException() != null ? 
+                        log.warn("Token failed: {}, reason: {}",
+                                registrationTokens.get(i),
+                                responses.get(i).getException() != null ?
                                         responses.get(i).getException().getMessage() : "Unknown error");
                     }
                 }
             }
 
-            log.info("Batch notification sent: success={}, failure={}, total={}", 
+            log.info("Batch notification sent: success={}, failure={}, total={}",
                     response.getSuccessCount(), response.getFailureCount(), registrationTokens.size());
 
             return response;

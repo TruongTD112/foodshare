@@ -44,7 +44,7 @@ public class NotifyMessageScheduler {
     @Transactional
     public void processNotifyMessages() {
         log.info("Starting scheduled task to process notify messages");
-        
+
         try {
             LocalDate today = LocalDate.now();
             int page = 0;
@@ -53,7 +53,7 @@ public class NotifyMessageScheduler {
             // Xử lý từng lô 100 bản ghi
             while (hasMore) {
                 Page<NotifyMessage> messagePage = notifyMessageRepository.findByDateAndStatus(
-                        today, 
+                        today,
                         "0", // status = 0 (chờ xử lý)
                         PageRequest.of(page, BATCH_SIZE)
                 );
@@ -125,7 +125,7 @@ public class NotifyMessageScheduler {
             List<UserFirebaseToken> tokens = userFirebaseTokenRepository.findByUserIdsAndActive(userIds);
 
             if (tokens.isEmpty()) {
-                log.warn("No active Firebase tokens found for template: templateId={}, userIds={}", 
+                log.warn("No active Firebase tokens found for template: templateId={}, userIds={}",
                         templateId, userIds);
                 updateMessagesStatus(messages, "2"); // failed
                 updateTemplateStatus(templateId, "2"); // đã xử lý
@@ -134,19 +134,25 @@ public class NotifyMessageScheduler {
 
             // Chuẩn bị data từ metadata
             Map<String, String> dataMap = new HashMap<>();
+
             if (template.getMetadata() != null && !template.getMetadata().isEmpty()) {
                 try {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> metadataObj = objectMapper.readValue(
-                            template.getMetadata(), 
+                            template.getMetadata(),
                             Map.class
                     );
-                    // Put toàn bộ metadata vào data với key "data"
-                    String dataJson = objectMapper.writeValueAsString(metadataObj);
-                    dataMap.put("data", dataJson);
+
+                    // Chỉ nhận value dạng String (FCM data chỉ cho String)
+                    for (Map.Entry<String, Object> entry : metadataObj.entrySet()) {
+                        if (entry.getValue() != null) {
+                            dataMap.put(entry.getKey(), entry.getValue().toString());
+                        }
+                    }
+
                 } catch (Exception e) {
-                    log.warn("Error parsing metadata for template: templateId={}, error={}", 
-                            templateId, e.getMessage());
+                    log.warn("Error parsing metadata for template: templateId={}, error={}", templateId, e.getMessage()
+                    );
                 }
             }
 
@@ -157,7 +163,7 @@ public class NotifyMessageScheduler {
 
             BatchResponse response = firebaseNotificationService.sendBatchNotification(
                     allTokens,
-                    "Foodshare",
+                    template.getTitle(),
                     template.getContent() != null ? template.getContent() : "",
                     dataMap
             );
@@ -213,13 +219,13 @@ public class NotifyMessageScheduler {
                         } catch (Exception e) {
                             log.warn("Error getting error code from exception: {}", e.getMessage());
                         }
-                        
+
                         // Kiểm tra các lỗi token không hợp lệ
                         if (isInvalidTokenError(errorCode)) {
                             UserFirebaseToken invalidToken = tokenIndexToToken.get(i);
                             if (invalidToken != null) {
                                 invalidTokens.add(invalidToken);
-                                log.warn("Invalid token detected and will be deleted: tokenId={}, userId={}, errorCode={}", 
+                                log.warn("Invalid token detected and will be deleted: tokenId={}, userId={}, errorCode={}",
                                         invalidToken.getId(), invalidToken.getUserId(), errorCode);
                             }
                         }
@@ -263,7 +269,7 @@ public class NotifyMessageScheduler {
                     }
                 }
 
-                log.info("Notification sent for template: templateId={}, success={}, failure={}, invalidTokensDeleted={}", 
+                log.info("Notification sent for template: templateId={}, success={}, failure={}, invalidTokensDeleted={}",
                         templateId, successCount, failureCount, invalidTokens.size());
             } else {
                 // Nếu response null, đánh dấu tất cả failed
@@ -278,7 +284,7 @@ public class NotifyMessageScheduler {
             updateTemplateStatus(templateId, "2");
 
         } catch (Exception e) {
-            log.error("Error processing template messages: templateId={}, error={}", 
+            log.error("Error processing template messages: templateId={}, error={}",
                     templateId, e.getMessage(), e);
             updateMessagesStatus(messages, "2"); // failed
             updateTemplateStatus(templateId, "2"); // đã xử lý
@@ -313,7 +319,7 @@ public class NotifyMessageScheduler {
 
     /**
      * Kiểm tra xem lỗi có phải là token không hợp lệ không
-     * 
+     *
      * @param errorCode mã lỗi từ Firebase
      * @return true nếu là lỗi token không hợp lệ
      */
@@ -321,7 +327,7 @@ public class NotifyMessageScheduler {
         if (errorCode == null) {
             return false;
         }
-        
+
         // Các error code cho token không hợp lệ
         return errorCode.equals("INVALID_ARGUMENT") ||
                errorCode.equals("UNREGISTERED") ||
