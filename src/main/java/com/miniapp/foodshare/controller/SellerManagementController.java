@@ -2,6 +2,7 @@ package com.miniapp.foodshare.controller;
 
 import com.miniapp.foodshare.common.Result;
 import com.miniapp.foodshare.dto.*;
+import com.miniapp.foodshare.service.NotifyTemplateService;
 import com.miniapp.foodshare.service.OrderService;
 import com.miniapp.foodshare.service.ProductManagementService;
 import com.miniapp.foodshare.service.ShopManagementService;
@@ -33,6 +34,7 @@ public class SellerManagementController {
     private final ProductManagementService productManagementService;
     private final ShopManagementService shopManagementService;
     private final OrderService orderService;
+    private final NotifyTemplateService notifyTemplateService;
 
     /**
      * Lấy thông tin seller hiện tại
@@ -424,6 +426,42 @@ public class SellerManagementController {
                     sellerId, orderId, request.getStatus(), result.getCode(), result.getMessage());
         }
         return result;
+    }
+
+    // =====================================================
+    // NOTIFY TEMPLATE MANAGEMENT APIs
+    // =====================================================
+
+    /**
+     * Tạo notify template mới
+     */
+    @PostMapping("/notify-templates")
+    @Operation(
+            summary = "Tạo notify template mới",
+            description = "Seller tạo notify template để gửi thông báo về sản phẩm giảm giá"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tạo notify template thành công",
+                    content = @Content(schema = @Schema(implementation = com.miniapp.foodshare.dto.NotifyTemplateResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Dữ liệu không hợp lệ"),
+            @ApiResponse(responseCode = "401", description = "Chưa xác thực"),
+            @ApiResponse(responseCode = "403", description = "Không có quyền truy cập shop này"),
+            @ApiResponse(responseCode = "404", description = "Shop hoặc Product không tồn tại"),
+            @ApiResponse(responseCode = "500", description = "Lỗi server")
+    })
+    public Result<com.miniapp.foodshare.dto.NotifyTemplateResponse> createNotifyTemplate(
+            @Parameter(description = "Thông tin notify template mới", required = true)
+            @Valid @RequestBody com.miniapp.foodshare.dto.CreateNotifyTemplateRequest request
+    ) {
+        Integer sellerId = getCurrentSellerId();
+        if (sellerId == null) {
+            return Result.error(INVALID_CREDENTIALS, "Unauthorized");
+        }
+
+        log.info("Seller create notify template request: sellerId={}, shopId={}, productId={}, radius={}",
+                sellerId, request.getShopId(), request.getProductId(), request.getRadius());
+
+        return notifyTemplateService.createNotifyTemplate(request, sellerId);
     }
 
 }
