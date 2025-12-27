@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -108,22 +109,25 @@ public class NotifyTemplateService {
                         .multiply(BigDecimal.valueOf(100))
                         .setScale(0, RoundingMode.HALF_UP);
             }
+            String discountFormat = String.valueOf(product.getPrice().toBigInteger().divide(BigInteger.valueOf(1000L)));
 
-            // Generate content: "Cửa hàng + tên cửa hàng + đang giảm giá ưu đãi + tên món ăn + discount món ăn + địa chỉ cửa hàng"
-            String content = String.format("Cửa hàng %s đang giảm giá ưu đãi %s %s%%. Địa chỉ tại %s",
-                    shop.getName() != null ? shop.getName() : "",
+            String title = String.format("%s giảm giá %s%% chỉ còn %sk",
                     product.getName() != null ? product.getName() : "",
-                    discountPercentage.intValue(),
+                    discountPercentage,
+                    discountFormat);
+
+            String content = String.format("Cửa hàng %s tại %s",
+                    shop.getName() != null ? shop.getName() : "",
                     shop.getAddress() != null ? shop.getAddress() : "");
 
             // Set default radius if not provided
             Double radius = request.getRadius() != null ? request.getRadius() : DEFAULT_RADIUS;
 
             // Create metadata JSON with link
-            String link = String.format("https://www.miniapp-foodshare.com/%d/%d", 
-                    request.getShopId(), request.getProductId());
+            String link = String.format("https://www.miniapp-foodshare.com/items/%d", request.getProductId());
             Map<String, String> metadataMap = new HashMap<>();
             metadataMap.put("link", link);
+            metadataMap.put("image", product.getImageUrl());
             
             String metadata;
             try {
@@ -141,6 +145,7 @@ public class NotifyTemplateService {
                     .radius(radius)
                     .shopId(request.getShopId())
                     .productId(request.getProductId())
+                    .title(title)
                     .content(content)
                     .metadata(metadata)
                     .createdAt(now)
@@ -235,6 +240,7 @@ public class NotifyTemplateService {
                 .radius(template.getRadius())
                 .shopId(template.getShopId())
                 .productId(template.getProductId())
+                .title(template.getTitle())
                 .content(template.getContent())
                 .metadata(template.getMetadata())
                 .createdAt(template.getCreatedAt())

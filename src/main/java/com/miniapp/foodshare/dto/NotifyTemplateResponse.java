@@ -13,6 +13,7 @@ public class NotifyTemplateResponse {
     Double radius;
     Integer shopId;
     Integer productId;
+    String title;
     String content;
     String metadata;
     LocalDateTime createdAt;

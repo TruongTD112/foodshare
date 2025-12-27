@@ -29,6 +29,9 @@ public class NotifyTemplate {
     @Column(name = "product_id")
     private Integer productId;
 
+    @Column(name = "title")
+    private String title;
+
     @Column(name = "content")
     private String content;
 

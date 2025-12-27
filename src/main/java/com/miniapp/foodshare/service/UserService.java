@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -111,19 +113,27 @@ public class UserService {
             log.warn("User not found: userId={}", userId);
             return Result.error(ErrorCode.USER_NOT_FOUND, "User not found: " + userId);
         }
-        
+
+        boolean isUpdate = false;
         // Cập nhật latitude nếu không null
         if (request.getLatitude() != null) {
             user.setLatitude(request.getLatitude());
             log.info("Updating latitude for userId={}: {}", userId, request.getLatitude());
+            isUpdate = true;
         }
         
         // Cập nhật longitude nếu không null
         if (request.getLongitude() != null) {
             user.setLongitude(request.getLongitude());
             log.info("Updating longitude for userId={}: {}", userId, request.getLongitude());
+            isUpdate = true;
         }
-        
+
+        // Cập nhật updateAt
+        if (isUpdate) {
+            user.setUpdatedAt(LocalDateTime.now());
+        }
+
         // Lưu vào database
         CustomerUser savedUser = customerUserRepository.save(user);
         
